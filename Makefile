@@ -1,4 +1,5 @@
-9cc: 9cc.c
+9cc: main.c
+	$(CC) -o 9cc main.c $(LDFLAGS)
 
 test: 9cc
 	./9cc -test
