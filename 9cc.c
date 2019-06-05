@@ -1,17 +1,17 @@
+#include <ctype.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
-#include <ctype.h>
 
 // token types
-enum {
-	TK_NUM = 256, // integer
+enum TokenType {
+	TK_NUM = 256,  // integer
 	TK_EOF,
 };
 
 // token
 typedef struct {
-	int  ty;
+	int ty;
 	int val;
 	char *input;
 } Token;
@@ -53,7 +53,8 @@ void tokenize(char *p) {
 			continue;
 		}
 
-		if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')') {
+		if (*p == '+' || *p == '-' || *p == '*' || *p == '/' ||
+		    *p == '(' || *p == ')') {
 			tokens[i].ty = *p;
 			tokens[i].input = p;
 			i++;
@@ -84,14 +85,14 @@ void tokenize(char *p) {
 int pos;
 
 // node types
-enum {
+enum NodeType {
 	ND_NUM = 256,
 };
 
 typedef struct Node {
-	int ty; // operator or ND_NUM
+	int ty;  // operator or ND_NUM
 	struct Node *lhs, *rhs;
-	int val; // for ND_NUM
+	int val;  // for ND_NUM
 } Node;
 
 Node *new_node(int node_type, Node *lhs, Node *rhs) {
@@ -187,19 +188,19 @@ void gen(Node *node) {
 	printf("  pop rax\n");
 
 	switch (node->ty) {
-	case '+':
-		printf("  add rax, rdi\n");
-		break;
-	case '-':
-		printf("  sub rax, rdi\n");
-		break;
-	case '*':
-		printf("  imul rdi\n");
-		break;
-	case '/':
-		printf("  cqo\n");
-		printf("  idiv rdi\n");
-		break;
+		case '+':
+			printf("  add rax, rdi\n");
+			break;
+		case '-':
+			printf("  sub rax, rdi\n");
+			break;
+		case '*':
+			printf("  imul rdi\n");
+			break;
+		case '/':
+			printf("  cqo\n");
+			printf("  idiv rdi\n");
+			break;
 	}
 	printf("  push rax\n");
 }
