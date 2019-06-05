@@ -1,5 +1,11 @@
-9cc: main.c
-	$(CC) -o 9cc main.c $(LDFLAGS)
+CFLAGS += -Wall -std=c11
+SRCS=$(wildcard *.c)
+OBJS=$(SRCS:.c=.o)
+
+9cc: $(OBJS)
+	$(CC) -o 9cc $(OBJS) $(LDFLAGS)
+
+$(OBJS): 9cc.h
 
 test: 9cc
 	./9cc -test
