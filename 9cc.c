@@ -72,7 +72,7 @@ void tokenize(char *p) {
 		}
 
 		if (*p == '+' || *p == '-' || *p == '*' || *p == '/' ||
-		    *p == '(' || *p == ')') {
+		    *p == '(' || *p == ')' || *p == '<') {
 			tokens[i].ty = *p;
 			tokens[i].input = p;
 			i++;
@@ -148,6 +148,7 @@ int consume(int ty) {
 //   term       = num | "(" expr ")"
 
 Node *equality();
+Node *relational();
 Node *add();
 Node *mul();
 Node *unary();
@@ -156,13 +157,25 @@ Node *term();
 Node *expr() { return equality(); }
 
 Node *equality() {
-	Node *node = add();
+	Node *node = relational();
 
 	for (;;) {
 		if (consume(TK_EQ)) {
-			node = new_node(ND_EQ, node, add());
+			node = new_node(ND_EQ, node, relational());
 		} else if (consume(TK_NE)) {
-			node = new_node(ND_NE, node, add());
+			node = new_node(ND_NE, node, relational());
+		} else {
+			return node;
+		}
+	}
+}
+
+Node *relational() {
+	Node *node = add();
+
+	for (;;) {
+		if (consume('<')) {
+			node = new_node('<', node, add());
 		} else {
 			return node;
 		}
@@ -256,6 +269,11 @@ void gen(Node *node) {
 		case ND_NE:
 			printf("  cmp rax, rdi\n");
 			printf("  setne al\n");
+			printf("  movzb rax, al\n");
+			break;
+		case '<':
+			printf("  cmp rax, rdi\n");
+			printf("  setl al\n");
 			printf("  movzb rax, al\n");
 			break;
 	}
