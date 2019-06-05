@@ -287,6 +287,7 @@ Node *term() {
 	}
 
 	error_at(tokens(pos)->input, "invalid token");
+	return NULL;
 }
 
 void gen(Node *node) {
@@ -351,7 +352,7 @@ void runtest() {
 	Vector *vec = new_vector();
 	expect(__LINE__, 0, vec->len);
 
-	for (int i = 0; i < 100; i++) vec_push(vec, (void *)i);
+	for (long i = 0; i < 100; i++) vec_push(vec, (void *)i);
 
 	expect(__LINE__, 100, vec->len);
 	expect(__LINE__, 0, (long)vec->data[0]);
