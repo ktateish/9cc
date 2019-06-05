@@ -53,7 +53,7 @@ void tokenize(char *p) {
 			continue;
 		}
 
-		if (*p == '+' || *p == '-' || *p == '*' || *p == '/') {
+		if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')') {
 			tokens[i].ty = *p;
 			tokens[i].input = p;
 			i++;
@@ -149,6 +149,14 @@ Node *mul() {
 }
 
 Node *term() {
+	if (consume('(')) {
+		Node *node = expr();
+		if (!consume(')')) {
+			error_at(tokens[pos].input, "close ')' not found");
+		}
+		return node;
+	}
+
 	if (tokens[pos].ty == TK_NUM) {
 		return new_node_num(tokens[pos++].val);
 	}
