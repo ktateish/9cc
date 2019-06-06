@@ -75,15 +75,19 @@ typedef struct Node {
 Node *new_node(int node_type, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
 
+Node *code(int i);
+
 int consume(int ty);
 
+void program();
+Node *stmt();
+Node *expr();
 Node *equality();
 Node *relational();
 Node *add();
 Node *mul();
 Node *unary();
 Node *term();
-Node *expr();
 
 void gen(Node *node);
 

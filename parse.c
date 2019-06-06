@@ -88,7 +88,8 @@ void tokenize(char *p) {
 		}
 
 		if (*p == '+' || *p == '-' || *p == '*' || *p == '/' ||
-		    *p == '(' || *p == ')' || *p == '<' || *p == '>') {
+		    *p == '(' || *p == ')' || *p == '<' || *p == '>' ||
+		    *p == ';') {
 			push_token(new_token(*p, p));
 			p++;
 			continue;
@@ -128,6 +129,14 @@ Node *new_node_num(int val) {
 	return nd;
 }
 
+Vector *code_vec;
+
+void init_code() { code_vec = new_vector(); }
+
+void push_code(Node *t) { vec_push(code_vec, t); }
+
+Node *code(int i) { return code_vec->data[i]; }
+
 int consume(int ty) {
 	if (tokens(pos)->ty != ty) {
 		return 0;
@@ -137,6 +146,8 @@ int consume(int ty) {
 }
 
 // Syntax:
+//   program    = stmt*
+//   stmt       = expr ";"
 //   expr       = equality
 //   equality   = relational ("==" relational | "!=" relational)*
 //   relational = add ("<" add | "<=" add | ">" add | ">=" add)*
@@ -144,6 +155,22 @@ int consume(int ty) {
 //   mul        = unary ("*" unary | "/" unary)*
 //   unary      = ("+" | "-")? term
 //   term       = num | "(" expr ")"
+
+void program() {
+	init_code();
+	while (tokens(pos)->ty != TK_EOF) {
+		push_code(stmt());
+	}
+	push_code(NULL);
+}
+
+Node *stmt() {
+	Node *node = expr();
+	if (!consume(';')) {
+		error_at(tokens(pos)->input, "not ';'");
+	}
+	return node;
+}
 
 Node *expr() { return equality(); }
 
