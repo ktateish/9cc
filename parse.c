@@ -180,22 +180,6 @@ Node *new_node_ident(char name) {
 	return nd;
 }
 
-void dump_node(Node *node, int level);
-void dump_node_rec(Node *node, int level) {
-	if (node == NULL) {
-		return;
-	}
-	dump_node(node, level);
-	dump_node_rec(node->lhs, level + 1);
-	dump_node_rec(node->rhs, level + 1);
-}
-
-void dump_nodes() {
-	for (int i = 0; code(i) != NULL; i++) {
-		dump_node_rec(code(i), 0);
-	}
-}
-
 void dump_node(Node *node, int level) {
 	fprintf(stderr, "%*s--\n", level * 2, "");
 	fprintf(stderr, "%*sNode: ", level * 2, "");
@@ -222,6 +206,21 @@ void dump_node(Node *node, int level) {
 		default:
 			fprintf(stderr, "%c\n", node->ty);
 			break;
+	}
+}
+
+void dump_node_rec(Node *node, int level) {
+	if (node == NULL) {
+		return;
+	}
+	dump_node(node, level);
+	dump_node_rec(node->lhs, level + 1);
+	dump_node_rec(node->rhs, level + 1);
+}
+
+void dump_nodes() {
+	for (int i = 0; code(i) != NULL; i++) {
+		dump_node_rec(code(i), 0);
 	}
 }
 
@@ -253,54 +252,60 @@ int consume(int ty) {
 //   unary      = ("+" | "-")? term
 //   term       = num | "(" expr ")"
 
-Node *stmt();
 Node *expr();
-Node *assign();
-Node *equality();
-Node *relational();
-Node *add();
-Node *mul();
-Node *unary();
-Node *term();
 
-void program() {
-	init_code();
-	while (tokens(pos)->ty != TK_EOF) {
-		push_code(stmt());
+Node *term() {
+	if (consume('(')) {
+		Node *node = expr();
+		if (!consume(')')) {
+			error_at(tokens(pos)->input, "close ')' not found");
+		}
+		return node;
 	}
-	push_code(NULL);
+
+	if (tokens(pos)->ty == TK_NUM) {
+		return new_node_num(tokens(pos++)->val);
+	}
+
+	if (tokens(pos)->ty == TK_IDENT) {
+		return new_node_ident(tokens(pos++)->input[0]);
+	}
+
+	error_at(tokens(pos)->input, "invalid token");
+	return NULL;
 }
 
-Node *stmt() {
-	Node *node = expr();
-	if (!consume(';')) {
-		error_at(tokens(pos)->input, "not ';'");
+Node *unary() {
+	if (consume('+')) {
+		return term();
+	} else if (consume('-')) {
+		return new_node('-', new_node_num(0), term());
 	}
-	return node;
+	return term();
 }
 
-Node *expr() { return assign(); }
-
-Node *assign() {
-	Node *node = equality();
+Node *mul() {
+	Node *node = unary();
 
 	for (;;) {
-		if (consume('=')) {
-			node = new_node('=', node, equality());
+		if (consume('*')) {
+			node = new_node('*', node, unary());
+		} else if (consume('/')) {
+			node = new_node('/', node, unary());
 		} else {
 			return node;
 		}
 	}
 }
 
-Node *equality() {
-	Node *node = relational();
+Node *add() {
+	Node *node = mul();
 
 	for (;;) {
-		if (consume(TK_EQ)) {
-			node = new_node(ND_EQ, node, relational());
-		} else if (consume(TK_NE)) {
-			node = new_node(ND_NE, node, relational());
+		if (consume('+')) {
+			node = new_node('+', node, mul());
+		} else if (consume('-')) {
+			node = new_node('-', node, mul());
 		} else {
 			return node;
 		}
@@ -325,60 +330,46 @@ Node *relational() {
 	}
 }
 
-Node *add() {
-	Node *node = mul();
+Node *equality() {
+	Node *node = relational();
 
 	for (;;) {
-		if (consume('+')) {
-			node = new_node('+', node, mul());
-		} else if (consume('-')) {
-			node = new_node('-', node, mul());
+		if (consume(TK_EQ)) {
+			node = new_node(ND_EQ, node, relational());
+		} else if (consume(TK_NE)) {
+			node = new_node(ND_NE, node, relational());
 		} else {
 			return node;
 		}
 	}
 }
 
-Node *mul() {
-	Node *node = unary();
+Node *assign() {
+	Node *node = equality();
 
 	for (;;) {
-		if (consume('*')) {
-			node = new_node('*', node, unary());
-		} else if (consume('/')) {
-			node = new_node('/', node, unary());
+		if (consume('=')) {
+			node = new_node('=', node, equality());
 		} else {
 			return node;
 		}
 	}
 }
 
-Node *unary() {
-	if (consume('+')) {
-		return term();
-	} else if (consume('-')) {
-		return new_node('-', new_node_num(0), term());
+Node *expr() { return assign(); }
+
+Node *stmt() {
+	Node *node = expr();
+	if (!consume(';')) {
+		error_at(tokens(pos)->input, "not ';'");
 	}
-	return term();
+	return node;
 }
 
-Node *term() {
-	if (consume('(')) {
-		Node *node = expr();
-		if (!consume(')')) {
-			error_at(tokens(pos)->input, "close ')' not found");
-		}
-		return node;
+void program() {
+	init_code();
+	while (tokens(pos)->ty != TK_EOF) {
+		push_code(stmt());
 	}
-
-	if (tokens(pos)->ty == TK_NUM) {
-		return new_node_num(tokens(pos++)->val);
-	}
-
-	if (tokens(pos)->ty == TK_IDENT) {
-		return new_node_ident(tokens(pos++)->input[0]);
-	}
-
-	error_at(tokens(pos)->input, "invalid token");
-	return NULL;
+	push_code(NULL);
 }
