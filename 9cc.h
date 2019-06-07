@@ -12,6 +12,10 @@ typedef struct {
 Vector *new_vector();
 void vec_push(Vector *vec, void *elem);
 
+//
+// Tokenizer
+//
+
 // token types
 enum TokenType {
 	TK_NUM = 256,  // integer
@@ -30,18 +34,7 @@ typedef struct {
 	char *input;
 } Token;
 
-Token *new_token(int ty, char *input);
-Token *new_token_num(int val, char *input);
-
-// input
-extern char *user_input;
-
-// tokenized results
-extern Vector *token_vec;
-
 void init_tokens();
-void push_token(Token *t);
-Token *tokens(int i);
 void dump_tokens();
 
 // function for reporting an error
@@ -76,32 +69,18 @@ typedef struct Node {
 	char name;  // for ND_IDENT
 } Node;
 
-Node *new_node(int node_type, Node *lhs, Node *rhs);
-Node *new_node_num(int val);
-Node *new_node_ident(char name);
 void dump_nodes();
-void dump_node(Node *node, int level);
-
 Node *code(int i);
-
-int consume(int ty);
-
 void program();
-Node *stmt();
-Node *expr();
-Node *assign();
-Node *equality();
-Node *relational();
-Node *add();
-Node *mul();
-Node *unary();
-Node *term();
 
+//
+// Code Generator
+//
 void gen(Node *node);
 
+//
 // Test
-void expect(int line, int expected, int actual);
-
+//
 void runtest();
 
 #endif  // NINE_CC_H

@@ -180,6 +180,7 @@ Node *new_node_ident(char name) {
 	return nd;
 }
 
+void dump_node(Node *node, int level);
 void dump_node_rec(Node *node, int level) {
 	if (node == NULL) {
 		return;
@@ -251,6 +252,16 @@ int consume(int ty) {
 //   mul        = unary ("*" unary | "/" unary)*
 //   unary      = ("+" | "-")? term
 //   term       = num | "(" expr ")"
+
+Node *stmt();
+Node *expr();
+Node *assign();
+Node *equality();
+Node *relational();
+Node *add();
+Node *mul();
+Node *unary();
+Node *term();
 
 void program() {
 	init_code();
