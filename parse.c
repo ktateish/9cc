@@ -34,6 +34,44 @@ void push_token(Token *t) { vec_push(token_vec, t); }
 
 Token *tokens(int i) { return token_vec->data[i]; }
 
+void dump_token(Token *t) {
+	fprintf(stderr, "--\n");
+	fprintf(stderr, "Token: ");
+	switch (t->ty) {
+		case TK_IDENT:
+			fprintf(stderr, "IDENTIFIER\n");
+			fprintf(stderr, "Name: %c\n", t->input[0]);
+			break;
+		case TK_EQ:
+			fprintf(stderr, "'=='\n");
+			break;
+		case TK_NE:
+			fprintf(stderr, "'!='\n");
+			break;
+		case TK_LE:
+			fprintf(stderr, "'<='\n");
+			break;
+		case TK_GE:
+			fprintf(stderr, "'>='\n");
+			break;
+		case TK_EOF:
+			fprintf(stderr, "EOF\n");
+			break;
+		case TK_NUM:
+			fprintf(stderr, "NUMBER\n");
+			fprintf(stderr, "Value: %d\n", t->val);
+			break;
+		default:
+			fprintf(stderr, "%c\n", t->ty);
+	}
+}
+
+void dump_tokens() {
+	for (int i = 0; tokens(i) != NULL; i++) {
+		dump_token(tokens(i));
+	}
+}
+
 // function for reporting an error
 void error(char *fmt, ...) {
 	va_list ap;
@@ -140,6 +178,50 @@ Node *new_node_ident(char name) {
 	nd->ty = ND_IDENT;
 	nd->name = name;
 	return nd;
+}
+
+void dump_node_rec(Node *node, int level) {
+	if (node == NULL) {
+		return;
+	}
+	dump_node(node, level);
+	dump_node_rec(node->lhs, level + 1);
+	dump_node_rec(node->rhs, level + 1);
+}
+
+void dump_nodes() {
+	for (int i = 0; code(i) != NULL; i++) {
+		dump_node_rec(code(i), 0);
+	}
+}
+
+void dump_node(Node *node, int level) {
+	fprintf(stderr, "%*s--\n", level * 2, "");
+	fprintf(stderr, "%*sNode: ", level * 2, "");
+	switch (node->ty) {
+		case ND_IDENT:
+			fprintf(stderr, "IDENT\n");
+			fprintf(stderr, "%*sName: %c\n", level * 2, "",
+				node->name);
+			break;
+		case ND_EQ:
+			fprintf(stderr, "'=='\n");
+			break;
+		case ND_NE:
+			fprintf(stderr, "'!='\n");
+			break;
+		case ND_LE:
+			fprintf(stderr, "'<='\n");
+			break;
+		case ND_NUM:
+			fprintf(stderr, "NUMBER\n");
+			fprintf(stderr, "%*sValue: %d\n", level * 2, "",
+				node->val);
+			break;
+		default:
+			fprintf(stderr, "%c\n", node->ty);
+			break;
+	}
 }
 
 Vector *code_vec;

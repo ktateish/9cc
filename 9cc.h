@@ -42,6 +42,7 @@ extern Vector *token_vec;
 void init_tokens();
 void push_token(Token *t);
 Token *tokens(int i);
+void dump_tokens();
 
 // function for reporting an error
 void error(char *fmt, ...);
@@ -78,6 +79,8 @@ typedef struct Node {
 Node *new_node(int node_type, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
 Node *new_node_ident(char name);
+void dump_nodes();
+void dump_node(Node *node, int level);
 
 Node *code(int i);
 
