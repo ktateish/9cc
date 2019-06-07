@@ -15,6 +15,7 @@ void vec_push(Vector *vec, void *elem);
 // token types
 enum TokenType {
 	TK_NUM = 256,  // integer
+	TK_IDENT,
 	TK_EOF,
 	TK_EQ,
 	TK_NE,
@@ -61,6 +62,7 @@ extern int pos;
 // node types
 enum NodeType {
 	ND_NUM = 256,
+	ND_IDENT,
 	ND_EQ,
 	ND_NE,
 	ND_LE,
@@ -69,11 +71,13 @@ enum NodeType {
 typedef struct Node {
 	int ty;  // operator or ND_NUM
 	struct Node *lhs, *rhs;
-	int val;  // for ND_NUM
+	int val;    // for ND_NUM
+	char name;  // for ND_IDENT
 } Node;
 
 Node *new_node(int node_type, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
+Node *new_node_ident(char name);
 
 Node *code(int i);
 
@@ -82,6 +86,7 @@ int consume(int ty);
 void program();
 Node *stmt();
 Node *expr();
+Node *assign();
 Node *equality();
 Node *relational();
 Node *add();

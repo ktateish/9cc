@@ -28,14 +28,22 @@ int main(int argc, char **argv) {
 	printf(".global main\n");
 	printf("main:\n");
 
+	// Prologue
+	printf("  push rbp\n");
+	printf("  mov rbp, rsp\n");
+	printf("  sub rsp, %d\n", 8 * ('z' - 'a' + 1));
+
 	// Generate code
 	for (int i = 0; code(i) != NULL; i++) {
 		gen(code(i));
 		printf("  pop rax\n");
 	}
 
+	// Epilogue
 	// The value of the expression will be on the top of the stack
 	// load it to rax and let it be return value.
+	printf("  mov rsp, rbp\n");
+	printf("  pop rbp\n");
 	printf("  ret\n");
 
 	return 0;

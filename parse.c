@@ -63,6 +63,12 @@ void tokenize(char *p) {
 			continue;
 		}
 
+		if ('a' <= *p && *p <= 'z') {
+			push_token(new_token(TK_IDENT, p));
+			p++;
+			continue;
+		}
+
 		if (*p == '=' && *(p + 1) == '=') {
 			push_token(new_token(TK_EQ, p));
 			p += 2;
@@ -89,7 +95,7 @@ void tokenize(char *p) {
 
 		if (*p == '+' || *p == '-' || *p == '*' || *p == '/' ||
 		    *p == '(' || *p == ')' || *p == '<' || *p == '>' ||
-		    *p == ';') {
+		    *p == ';' || *p == '=') {
 			push_token(new_token(*p, p));
 			p++;
 			continue;
@@ -129,6 +135,13 @@ Node *new_node_num(int val) {
 	return nd;
 }
 
+Node *new_node_ident(char name) {
+	Node *nd = malloc(sizeof(Node));
+	nd->ty = ND_IDENT;
+	nd->name = name;
+	return nd;
+}
+
 Vector *code_vec;
 
 void init_code() { code_vec = new_vector(); }
@@ -148,7 +161,8 @@ int consume(int ty) {
 // Syntax:
 //   program    = stmt*
 //   stmt       = expr ";"
-//   expr       = equality
+//   expr       = assign
+//   assign       = equality (= equality)?
 //   equality   = relational ("==" relational | "!=" relational)*
 //   relational = add ("<" add | "<=" add | ">" add | ">=" add)*
 //   add        = mul ("+" mul | "-" mul)*
@@ -172,7 +186,19 @@ Node *stmt() {
 	return node;
 }
 
-Node *expr() { return equality(); }
+Node *expr() { return assign(); }
+
+Node *assign() {
+	Node *node = equality();
+
+	for (;;) {
+		if (consume('=')) {
+			node = new_node('=', node, equality());
+		} else {
+			return node;
+		}
+	}
+}
 
 Node *equality() {
 	Node *node = relational();
@@ -254,6 +280,10 @@ Node *term() {
 
 	if (tokens(pos)->ty == TK_NUM) {
 		return new_node_num(tokens(pos++)->val);
+	}
+
+	if (tokens(pos)->ty == TK_IDENT) {
+		return new_node_ident(tokens(pos++)->input[0]);
 	}
 
 	error_at(tokens(pos)->input, "invalid token");
