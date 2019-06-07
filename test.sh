@@ -4,9 +4,15 @@ try() {
 	expected="$1"
 	input="$2"
 
-	./9cc "$input" > tmp.s
-	gcc -o tmp tmp.s
-	./tmp
+	mkdir -p /tmp/9cc-test
+	sfile=$(mktemp /tmp/9cc-test/XXXXXXXX.s)
+	trap "rm -f $sfile" RETURN
+	./9cc "$input" > "$sfile"
+
+	exefile=$(mktemp /tmp/9cc-test/XXXXXXXX)
+	trap "rm -f $exefile $sfile" RETURN
+	gcc -o "$exefile" "$sfile"
+	"$exefile"
 	actual="$?"
 
 	if [ "$actual" = "$expected" ]; then

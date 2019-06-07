@@ -13,3 +13,6 @@ test: 9cc
 
 clean:
 	rm -f 9cc *.o *~ tmp*
+
+watch: 9cc
+	while inotifywait -e modify .; do make test; done
