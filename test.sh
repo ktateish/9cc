@@ -62,4 +62,7 @@ try 36 "a=2; b=3; 3*5; a = a*b; a = a*a;3+5;a;"
 try 3 "return 3;"
 try 3 "return 3; return 5;"
 
+try 3 "foo = 3; foo;"
+try 6 "foo = 1; bar = 2 + 3; return foo + bar;"
+
 echo OK

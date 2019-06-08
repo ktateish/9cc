@@ -32,6 +32,7 @@ enum TokenType {
 typedef struct {
 	int ty;
 	int val;
+	char *name;
 	char *input;
 } Token;
 
@@ -67,13 +68,23 @@ enum NodeType {
 typedef struct Node {
 	int ty;  // operator or ND_NUM
 	struct Node *lhs, *rhs;
-	int val;    // for ND_NUM
-	char name;  // for ND_IDENT
+	int val;     // for ND_NUM
+	char *name;  // for ND_IDENT
 } Node;
 
 void dump_nodes();
 Node *code(int i);
 void program();
+
+// variables
+typedef struct Var {
+	struct Var *next;
+	char *name;
+	int offset;
+} Var;
+
+void var_put(char *name);
+int var_offset(char *name);
 
 //
 // Code Generator

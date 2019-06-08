@@ -1,4 +1,5 @@
 // vim:set filetype=c tabstop=8 shiftwidth=8 noexpandtab:
+#define _POSIX_C_SOURCE 200809L
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -19,6 +20,14 @@ Token *new_token_num(int val, char *input) {
 	Token *t = malloc(sizeof(Token));
 	t->ty = TK_NUM;
 	t->val = val;
+	t->input = input;
+	return t;
+}
+
+Token *new_token_ident(char *input, int len) {
+	Token *t = malloc(sizeof(Token));
+	t->ty = TK_IDENT;
+	t->name = strndup(input, len);
 	t->input = input;
 	return t;
 }
@@ -91,6 +100,10 @@ void error_at(char *loc, char *msg) {
 	exit(1);
 }
 
+int is_alpha(int c) {
+	return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || (c == '_');
+}
+
 int is_alnum(int c) {
 	return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') ||
 	       ('0' <= c && c <= '9') || (c == '_');
@@ -113,9 +126,13 @@ void tokenize(char *p) {
 			continue;
 		}
 
-		if ('a' <= *p && *p <= 'z') {
-			push_token(new_token(TK_IDENT, p));
-			p++;
+		if (is_alpha(*p)) {
+			char *q = p;
+			while (is_alnum(*q)) q++;
+			int len = q - p;
+
+			push_token(new_token_ident(p, len));
+			p += len;
 			continue;
 		}
 
@@ -185,7 +202,7 @@ Node *new_node_num(int val) {
 	return nd;
 }
 
-Node *new_node_ident(char name) {
+Node *new_node_ident(char *name) {
 	Node *nd = malloc(sizeof(Node));
 	nd->ty = ND_IDENT;
 	nd->name = name;
@@ -198,7 +215,7 @@ void dump_node(Node *node, int level) {
 	switch (node->ty) {
 		case ND_IDENT:
 			fprintf(stderr, "IDENT\n");
-			fprintf(stderr, "%*sName: %c\n", level * 2, "",
+			fprintf(stderr, "%*sName: %s\n", level * 2, "",
 				node->name);
 			break;
 		case ND_EQ:
@@ -252,6 +269,32 @@ int consume(int ty) {
 	return 1;
 }
 
+Var *variables;
+Var *variables_sentinel;
+
+Var *new_var(Var *next, char *name, int offset) {
+	Var *var = malloc(sizeof(Var));
+	var->next = next;
+	var->name = name;
+	var->offset = offset;
+	return var;
+}
+
+void init_variables() { variables = variables_sentinel = new_var(NULL, "", 0); }
+
+void var_put(char *name) {
+	variables = new_var(variables, name, variables->offset + 8);
+}
+
+int var_offset(char *name) {
+	for (Var *p = variables; p != variables_sentinel; p = p->next) {
+		if (strcmp(p->name, name) == 0) {
+			return p->offset;
+		}
+	}
+	return -1;
+}
+
 // Syntax:
 //   program    = stmt*
 //   stmt       = "return"? expr ";"
@@ -280,7 +323,11 @@ Node *term() {
 	}
 
 	if (tokens(pos)->ty == TK_IDENT) {
-		return new_node_ident(tokens(pos++)->input[0]);
+		char *name = tokens(pos++)->name;
+		if (var_offset(name) == -1) {
+			var_put(name);
+		}
+		return new_node_ident(name);
 	}
 
 	error_at(tokens(pos)->input, "invalid token");
@@ -387,6 +434,7 @@ Node *stmt() {
 
 void program() {
 	init_code();
+	init_variables();
 	while (tokens(pos)->ty != TK_EOF) {
 		push_code(stmt());
 	}

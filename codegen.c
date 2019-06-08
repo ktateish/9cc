@@ -8,7 +8,8 @@ void gen_lval(Node *node) {
 		error("assigning lvalue is not a variable");
 	}
 
-	int offset = ('z' - node->name + 1) * 8;
+	int offset = var_offset(node->name);
+
 	printf("  mov rax, rbp\n");
 	printf("  sub rax, %d\n", offset);
 	printf("  push rax\n");
