@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
 	// Prologue
 	printf("  push rbp\n");
 	printf("  mov rbp, rsp\n");
-	printf("  sub rsp, %d\n", 8 * ('z' - 'a' + 1));
+	printf("  sub rsp, %d\n", var_offset(NULL));
 
 	// Generate code
 	for (int i = 0; code(i) != NULL; i++) {

@@ -287,6 +287,9 @@ void var_put(char *name) {
 }
 
 int var_offset(char *name) {
+	if (name == NULL) {
+		return variables->offset;
+	}
 	for (Var *p = variables; p != variables_sentinel; p = p->next) {
 		if (strcmp(p->name, name) == 0) {
 			return p->offset;
