@@ -59,4 +59,7 @@ try 7 "1+2; 3+4;"
 try 11 "a=5; b=6; a+b;"
 try 36 "a=2; b=3; 3*5; a = a*b; a = a*a;3+5;a;"
 
+try 3 "return 3;"
+try 3 "return 3; return 5;"
+
 echo OK

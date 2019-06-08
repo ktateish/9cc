@@ -19,6 +19,7 @@ void vec_push(Vector *vec, void *elem);
 // token types
 enum TokenType {
 	TK_NUM = 256,  // integer
+	TK_RETURN,
 	TK_IDENT,
 	TK_EOF,
 	TK_EQ,
@@ -56,6 +57,7 @@ extern int pos;
 // node types
 enum NodeType {
 	ND_NUM = 256,
+	ND_RETURN,
 	ND_IDENT,
 	ND_EQ,
 	ND_NE,

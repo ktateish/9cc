@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "9cc.h"
 
@@ -90,6 +91,11 @@ void error_at(char *loc, char *msg) {
 	exit(1);
 }
 
+int is_alnum(int c) {
+	return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') ||
+	       ('0' <= c && c <= '9') || (c == '_');
+}
+
 // tokenize a string pointed by user_input and save them to tokens
 void tokenize(char *p) {
 	user_input = p;
@@ -98,6 +104,12 @@ void tokenize(char *p) {
 		// skip whitespace
 		if (isspace(*p)) {
 			p++;
+			continue;
+		}
+
+		if (strncmp(p, "return", 6) == 0 && !is_alnum(p[6])) {
+			push_token(new_token(TK_RETURN, p));
+			p += 6;
 			continue;
 		}
 
@@ -242,7 +254,7 @@ int consume(int ty) {
 
 // Syntax:
 //   program    = stmt*
-//   stmt       = expr ";"
+//   stmt       = "return"? expr ";"
 //   expr       = assign
 //   assign       = equality (= equality)?
 //   equality   = relational ("==" relational | "!=" relational)*
@@ -359,7 +371,14 @@ Node *assign() {
 Node *expr() { return assign(); }
 
 Node *stmt() {
-	Node *node = expr();
+	Node *node;
+
+	if (consume(TK_RETURN)) {
+		node = new_node(ND_RETURN, expr(), NULL);
+	} else {
+		node = expr();
+	}
+
 	if (!consume(';')) {
 		error_at(tokens(pos)->input, "not ';'");
 	}
