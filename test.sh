@@ -65,4 +65,15 @@ try 3 "return 3; return 5;"
 try 3 "foo = 3; foo;"
 try 6 "foo = 1; bar = 2 + 3; return foo + bar;"
 
+try 3 "if (1) return 3; return 5;"
+try 5 "if (0) return 3; return 5;"
+
+try 1 "foo = 0; if (1+1) foo = 1; return foo;"
+try 0 "foo = 0; if (1-1) foo = 1; return foo;"
+
+try 8 "foo = 2; if (1) foo = foo*2; bar = foo+foo; return bar;"
+
+try 7 "if (0) return 3; if (0) return 5; return 7;"
+try 7 "if (0) return 3; if (0) return 5; return 7;"
+
 echo OK

@@ -15,9 +15,23 @@ void gen_lval(Node *node) {
 	printf("  push rax\n");
 }
 
+int labelseq;
+
 void gen(Node *node) {
 	if (node->ty == ND_NUM) {
 		printf("  push %d\n", node->val);
+		return;
+	}
+
+	if (node->ty == ND_IF) {
+		int seq = labelseq++;
+		gen(node->cond);
+		printf("  pop rax\n");
+		printf("  push rax\n");
+		printf("  cmp rax, 0\n");
+		printf("  je .Lend%d\n", seq);
+		gen(node->thenc);
+		printf(".Lend%d:\n", seq);
 		return;
 	}
 
