@@ -82,4 +82,7 @@ try 5 "if (0) return 3; else return 5; return 7;"
 try 0 "foo = 0; while (0) foo = foo+1; return foo;"
 try 5 "foo = 0; while (foo < 5) foo = foo+1; return foo;"
 
+try 5 "for (;;) return 5;"
+try 4 "foo = 0; for (i = 0; i < 5; i = i+1) foo = i; return foo;"
+
 echo OK

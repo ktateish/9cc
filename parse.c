@@ -138,6 +138,12 @@ void tokenize(char *p) {
 			continue;
 		}
 
+		if (strncmp(p, "for", 3) == 0 && !is_alnum(p[3])) {
+			push_token(new_token(TK_FOR, p));
+			p += 3;
+			continue;
+		}
+
 		if (strncmp(p, "return", 6) == 0 && !is_alnum(p[6])) {
 			push_token(new_token(TK_RETURN, p));
 			p += 6;
@@ -226,6 +232,16 @@ Node *new_node_while(Node *cond, Node *body) {
 	Node *nd = malloc(sizeof(Node));
 	nd->ty = ND_WHILE;
 	nd->cond = cond;
+	nd->body = body;
+	return nd;
+}
+
+Node *new_node_for(Node *init, Node *cond, Node *update, Node *body) {
+	Node *nd = malloc(sizeof(Node));
+	nd->ty = ND_FOR;
+	nd->init = init;
+	nd->cond = cond;
+	nd->update = update;
 	nd->body = body;
 	return nd;
 }
@@ -338,6 +354,7 @@ int var_offset(char *name) {
 //   stmt       = expr ";"
 //		| "if" "(" expr ")" stmt ("else" stmt)?
 //		| "while" "(" expr ")" stmt
+//		| "for" "(" expr? ";" expr? ";" expr? ";" ")" stmt
 //		| "return" expr ";"
 //   expr       = assign
 //   assign       = equality (= equality)?
@@ -486,6 +503,38 @@ Node *stmt() {
 			error_at(tokens(pos)->input, "not ')'");
 		}
 		return new_node_while(cond, stmt());
+	}
+
+	if (consume(TK_FOR)) {
+		if (!consume('(')) {
+			error_at(tokens(pos)->input, "not '('");
+		}
+
+		Node *init = NULL;
+		if (!consume(';')) {
+			init = expr();
+			if (!consume(';')) {
+				error_at(tokens(pos)->input, "not ';'");
+			}
+		}
+
+		Node *cond = NULL;
+		if (!consume(';')) {
+			cond = expr();
+			if (!consume(';')) {
+				error_at(tokens(pos)->input, "not ';'");
+			}
+		}
+
+		Node *update = NULL;
+		if (!consume(')')) {
+			update = expr();
+			if (!consume(')')) {
+				error_at(tokens(pos)->input, "not ')'");
+			}
+		}
+
+		return new_node_for(init, cond, update, stmt());
 	}
 
 	if (consume(TK_RETURN)) {
