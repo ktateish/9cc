@@ -20,6 +20,7 @@ void vec_push(Vector *vec, void *elem);
 enum TokenType {
 	TK_NUM = 256,  // integer
 	TK_IF,
+	TK_ELSE,
 	TK_RETURN,
 	TK_IDENT,
 	TK_EOF,
@@ -60,6 +61,7 @@ extern int pos;
 enum NodeType {
 	ND_NUM = 256,
 	ND_IF,
+	ND_ELSE,
 	ND_RETURN,
 	ND_IDENT,
 	ND_EQ,
@@ -69,7 +71,7 @@ enum NodeType {
 
 typedef struct Node {
 	int ty;  // operator or ND_NUM
-	struct Node *lhs, *rhs, *cond, *thenc;
+	struct Node *lhs, *rhs, *cond, *thenc, *elsec;
 	int val;     // for ND_NUM
 	char *name;  // for ND_IDENT
 } Node;

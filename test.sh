@@ -76,4 +76,7 @@ try 8 "foo = 2; if (1) foo = foo*2; bar = foo+foo; return bar;"
 try 7 "if (0) return 3; if (0) return 5; return 7;"
 try 7 "if (0) return 3; if (0) return 5; return 7;"
 
+try 3 "if (1) return 3; else return 5; return 7;"
+try 5 "if (0) return 3; else return 5; return 7;"
+
 echo OK

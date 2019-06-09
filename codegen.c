@@ -25,13 +25,26 @@ void gen(Node *node) {
 
 	if (node->ty == ND_IF) {
 		int seq = labelseq++;
-		gen(node->cond);
-		printf("  pop rax\n");
-		printf("  push rax\n");
-		printf("  cmp rax, 0\n");
-		printf("  je .Lend%d\n", seq);
-		gen(node->thenc);
-		printf(".Lend%d:\n", seq);
+		if (node->elsec) {
+			gen(node->cond);
+			printf("  pop rax\n");
+			printf("  push rax\n");
+			printf("  cmp rax, 0\n");
+			printf("  je .Lelse%d\n", seq);
+			gen(node->thenc);
+			printf("  jmp .Lend%d\n", seq);
+			printf(".Lelse%d:\n", seq);
+			gen(node->elsec);
+			printf(".Lend%d:\n", seq);
+		} else {
+			gen(node->cond);
+			printf("  pop rax\n");
+			printf("  push rax\n");
+			printf("  cmp rax, 0\n");
+			printf("  je .Lend%d\n", seq);
+			gen(node->thenc);
+			printf(".Lend%d:\n", seq);
+		}
 		return;
 	}
 

@@ -126,6 +126,12 @@ void tokenize(char *p) {
 			continue;
 		}
 
+		if (strncmp(p, "else", 4) == 0 && !is_alnum(p[4])) {
+			push_token(new_token(TK_ELSE, p));
+			p += 4;
+			continue;
+		}
+
 		if (strncmp(p, "return", 6) == 0 && !is_alnum(p[6])) {
 			push_token(new_token(TK_RETURN, p));
 			p += 6;
@@ -201,11 +207,12 @@ Node *new_node(int node_type, Node *lhs, Node *rhs) {
 	return nd;
 }
 
-Node *new_node_if(Node *cond, Node *thenc) {
+Node *new_node_if(Node *cond, Node *thenc, Node *elsec) {
 	Node *nd = malloc(sizeof(Node));
 	nd->ty = ND_IF;
 	nd->cond = cond;
 	nd->thenc = thenc;
+	nd->elsec = elsec;
 	return nd;
 }
 
@@ -315,7 +322,7 @@ int var_offset(char *name) {
 // Syntax:
 //   program    = stmt*
 //   stmt       = expr ";"
-//		| "if" "(" expr ")" stmt
+//		| "if" "(" expr ")" stmt ("else" stmt)?
 //		| "return" expr ";"
 //   expr       = assign
 //   assign       = equality (= equality)?
@@ -447,7 +454,12 @@ Node *stmt() {
 		if (!consume(')')) {
 			error_at(tokens(pos)->input, "not ')'");
 		}
-		return new_node_if(cond, stmt());
+		Node *thenc = stmt();
+		Node *elsec = NULL;
+		if (consume(TK_ELSE)) {
+			elsec = stmt();
+		}
+		return new_node_if(cond, thenc, elsec);
 	}
 
 	if (consume(TK_RETURN)) {
