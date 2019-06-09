@@ -18,7 +18,7 @@ This repositry is my implementation of 9cc based on [his book '低レイヤを�
     * [x] Single character local variables
     * [x] Support `return` statement
     * [x] Multi-character local variables
-    * [ ] Control structures
+    * [x] Control structures
         * if
         * while
         * for
