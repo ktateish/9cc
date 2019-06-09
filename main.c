@@ -19,9 +19,11 @@ int main(int argc, char **argv) {
 	// tokenize
 	init_tokens();
 	tokenize(argv[1]);
+	// dump_tokens();
 
 	// Parse tokens
 	program();
+	// dump_nodes();
 
 	// output first part assembry
 	printf(".intel_syntax noprefix\n");
