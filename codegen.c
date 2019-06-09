@@ -23,6 +23,14 @@ void gen(Node *node) {
 		return;
 	}
 
+	if (node->ty == ND_BLOCK) {
+		for (int i = 0; i < node->stmts->len; i++) {
+			gen(node->stmts->data[i]);
+			printf("  pop rax\n");
+		}
+		return;
+	}
+
 	if (node->ty == ND_IF) {
 		int seq = labelseq++;
 		if (node->elsec) {

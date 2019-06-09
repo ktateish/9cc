@@ -186,7 +186,7 @@ void tokenize(char *p) {
 
 		if (*p == '+' || *p == '-' || *p == '*' || *p == '/' ||
 		    *p == '(' || *p == ')' || *p == '<' || *p == '>' ||
-		    *p == ';' || *p == '=') {
+		    *p == ';' || *p == '=' || *p == '{' || *p == '}') {
 			push_token(new_token(*p, p));
 			p++;
 			continue;
@@ -216,6 +216,13 @@ Node *new_node(int node_type, Node *lhs, Node *rhs) {
 	nd->ty = node_type;
 	nd->lhs = lhs;
 	nd->rhs = rhs;
+	return nd;
+}
+
+Node *new_node_block(Vector *stmts) {
+	Node *nd = malloc(sizeof(Node));
+	nd->ty = ND_BLOCK;
+	nd->stmts = stmts;
 	return nd;
 }
 
@@ -352,6 +359,7 @@ int var_offset(char *name) {
 // Syntax:
 //   program    = stmt*
 //   stmt       = expr ";"
+//		| "{" stmt* "}"
 //		| "if" "(" expr ")" stmt ("else" stmt)?
 //		| "while" "(" expr ")" stmt
 //		| "for" "(" expr? ";" expr? ";" expr? ";" ")" stmt
@@ -477,6 +485,14 @@ Node *expr() { return assign(); }
 
 Node *stmt() {
 	Node *node;
+
+	if (consume('{')) {
+		Vector *ss = new_vector();
+		while (!consume('}')) {
+			vec_push(ss, stmt());
+		}
+		return new_node_block(ss);
+	}
 
 	if (consume(TK_IF)) {
 		if (!consume('(')) {

@@ -22,7 +22,7 @@ This repositry is my implementation of 9cc based on [his book '低レイヤを�
         * if
         * while
         * for
-    * [ ] Block
+    * [x] Block
     * [ ] Function call
     * [ ] Function definition
 * [ ] Pointer and string literal

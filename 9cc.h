@@ -62,6 +62,7 @@ extern int pos;
 // node types
 enum NodeType {
 	ND_NUM = 256,
+	ND_BLOCK,
 	ND_IF,
 	ND_ELSE,
 	ND_WHILE,
@@ -78,6 +79,8 @@ typedef struct Node {
 	struct Node *lhs, *rhs, *cond, *thenc, *elsec, *init, *update, *body;
 	int val;     // for ND_NUM
 	char *name;  // for ND_IDENT
+
+	Vector *stmts;  // for ND_BLOCK
 } Node;
 
 void dump_nodes();
