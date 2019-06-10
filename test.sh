@@ -1,18 +1,19 @@
 #!/bin/bash
 
+mkdir -p /tmp/9cc-test
+d=$(mktemp -d /tmp/9cc-test/XXXXXXXX)
+trap "rm -rf $d; rmdir /tmp/9cc-test 2>/dev/null" EXIT
+
+cp 9cc $d/9cc
+cd $d
+
 try() {
 	expected="$1"
 	input="$2"
 
-	mkdir -p /tmp/9cc-test
-	sfile=$(mktemp /tmp/9cc-test/XXXXXXXX.s)
-	trap "rm -f $sfile" RETURN
-	./9cc "$input" > "$sfile"
-
-	exefile=$(mktemp /tmp/9cc-test/XXXXXXXX)
-	trap "rm -f $exefile $sfile" RETURN
-	gcc -o "$exefile" "$sfile"
-	"$exefile"
+	./9cc "$input" > tmp.s
+	gcc -o tmp  tmp.s
+	./tmp
 	actual="$?"
 
 	if [ "$actual" = "$expected" ]; then
