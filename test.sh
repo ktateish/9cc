@@ -11,8 +11,12 @@ try() {
 	expected="$1"
 	input="$2"
 
+	cat <<EOM > foo.c
+int foo() { return 5; }
+EOM
+
 	./9cc "$input" > tmp.s
-	gcc -o tmp  tmp.s
+	gcc -o tmp  tmp.s foo.c
 	./tmp
 	actual="$?"
 
@@ -89,5 +93,7 @@ try 4 "foo = 0; for (i = 0; i < 5; i = i+1) foo = i; return foo;"
 try 5 "{ return 5; }"
 try 5 "for (;;) { return 5; }"
 try 5 "foo = 0; i = 0; while (i < 5) { foo = foo+1; i = i+1; } return foo;"
+
+try 8 "bar = 3; return foo() + bar;"
 
 echo OK

@@ -31,6 +31,12 @@ void gen(Node *node) {
 		return;
 	}
 
+	if (node->ty == ND_FUNCALL) {
+		printf("  call %s\n", node->name);
+		printf("  push rax\n");
+		return;
+	}
+
 	if (node->ty == ND_IF) {
 		int seq = labelseq++;
 		if (node->elsec) {

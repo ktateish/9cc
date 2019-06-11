@@ -63,6 +63,7 @@ extern int pos;
 enum NodeType {
 	ND_NUM = 256,
 	ND_BLOCK,
+	ND_FUNCALL,
 	ND_IF,
 	ND_ELSE,
 	ND_WHILE,

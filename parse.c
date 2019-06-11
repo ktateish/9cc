@@ -241,6 +241,13 @@ Node *new_node_block(Vector *stmts) {
 	return nd;
 }
 
+Node *new_node_funcall(char *name) {
+	Node *nd = malloc(sizeof(Node));
+	nd->ty = ND_FUNCALL;
+	nd->name = name;
+	return nd;
+}
+
 Node *new_node_if(Node *cond, Node *thenc, Node *elsec) {
 	Node *nd = malloc(sizeof(Node));
 	nd->ty = ND_IF;
@@ -292,6 +299,11 @@ void dump_node(Node *node, int level) {
 			for (int i = 0; i < node->stmts->len; i++) {
 				dump_node_rec(node->stmts->data[i], level + 1);
 			}
+			break;
+		case ND_FUNCALL:
+			fprintf(stderr, "FUNCALL\n");
+			fprintf(stderr, "%*sName: %s\n", level * 2, "",
+				node->name);
 			break;
 		case ND_IF:
 			fprintf(stderr, "WHILE\n");
@@ -440,6 +452,13 @@ Node *term() {
 
 	if (tokens(pos)->ty == TK_IDENT) {
 		char *name = tokens(pos++)->name;
+		if (consume('(')) {
+			if (!consume(')')) {
+				error_at(tokens(pos)->input,
+					 "close ')' not found");
+			}
+			return new_node_funcall(name);
+		}
 		if (var_offset(name) == -1) {
 			var_put(name);
 		}
