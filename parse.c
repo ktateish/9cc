@@ -65,7 +65,7 @@ void dump_token(Token *t) {
 			break;
 		case TK_IDENT:
 			fprintf(stderr, "IDENTIFIER\n");
-			fprintf(stderr, "Name: %c\n", t->input[0]);
+			fprintf(stderr, "Name: %s\n", t->name);
 			break;
 		case TK_EQ:
 			fprintf(stderr, "'=='\n");
