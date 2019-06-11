@@ -15,8 +15,18 @@ try() {
 int foo() { return 5; }
 EOM
 
+	cat <<EOM > bar.c
+int bar(int a) { return a * 2; }
+EOM
+
+	cat <<EOM > buz.c
+int buz(int a1, int a2, int a3, int a4, int a5, int a6) {
+	return a1 + a2 + a3 + a4 + a5 + a6;
+}
+EOM
+
 	./9cc "$input" > tmp.s
-	gcc -o tmp  tmp.s foo.c
+	gcc -o tmp  tmp.s foo.c bar.c buz.c
 	./tmp
 	actual="$?"
 
@@ -95,5 +105,9 @@ try 5 "for (;;) { return 5; }"
 try 5 "foo = 0; i = 0; while (i < 5) { foo = foo+1; i = i+1; } return foo;"
 
 try 8 "bar = 3; return foo() + bar;"
+
+try 9 "a = 2; return bar(a) + 5;"
+try 28 "return buz(1, 2, 3, 4, 5, 6) + 7;"
+try 28 "a = buz(1, 2, 3, 4, 5, 6) + 7; return a;"
 
 echo OK

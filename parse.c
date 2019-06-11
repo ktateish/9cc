@@ -201,7 +201,8 @@ void tokenize(char *p) {
 
 		if (*p == '+' || *p == '-' || *p == '*' || *p == '/' ||
 		    *p == '(' || *p == ')' || *p == '<' || *p == '>' ||
-		    *p == ';' || *p == '=' || *p == '{' || *p == '}') {
+		    *p == ';' || *p == '=' || *p == '{' || *p == '}' ||
+		    *p == ',') {
 			push_token(new_token(*p, p));
 			p++;
 			continue;
@@ -241,10 +242,11 @@ Node *new_node_block(Vector *stmts) {
 	return nd;
 }
 
-Node *new_node_funcall(char *name) {
+Node *new_node_funcall(char *name, Vector *args) {
 	Node *nd = malloc(sizeof(Node));
 	nd->ty = ND_FUNCALL;
 	nd->name = name;
+	nd->args = args;
 	return nd;
 }
 
@@ -452,17 +454,30 @@ Node *term() {
 
 	if (tokens(pos)->ty == TK_IDENT) {
 		char *name = tokens(pos++)->name;
-		if (consume('(')) {
-			if (!consume(')')) {
-				error_at(tokens(pos)->input,
-					 "close ')' not found");
+		if (!consume('(')) {
+			// variables
+			if (var_offset(name) == -1) {
+				var_put(name);
 			}
-			return new_node_funcall(name);
+			return new_node_ident(name);
 		}
-		if (var_offset(name) == -1) {
-			var_put(name);
+
+		// function call
+		Vector *args = new_vector();
+		if (consume(')')) {
+			// no arguments
+			return new_node_funcall(name, args);
 		}
-		return new_node_ident(name);
+
+		// have oen or more arguments
+		vec_push(args, expr());
+		while (!consume(')')) {
+			if (!consume(',')) {
+				error_at(tokens(pos)->input, "',' not found");
+			}
+			vec_push(args, expr());
+		}
+		return new_node_funcall(name, args);
 	}
 
 	error_at(tokens(pos)->input, "invalid token");

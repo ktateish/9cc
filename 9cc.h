@@ -82,6 +82,7 @@ typedef struct Node {
 	char *name;  // for ND_IDENT
 
 	Vector *stmts;  // for ND_BLOCK
+	Vector *args;   // for ND_FUNCALL
 } Node;
 
 void dump_nodes();

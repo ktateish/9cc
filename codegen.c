@@ -32,7 +32,66 @@ void gen(Node *node) {
 	}
 
 	if (node->ty == ND_FUNCALL) {
+		int n = node->args->len;
+		// Check whther rsp is 16byte-aligned
+		//
+		// a) if algined:
+		//     |   ...  |
+		//     |    x   | <- original stack top (aligned)
+		//     |    0   | <- padding (not aligned)
+		//     |    1   | <- pop flag (aligned)
+		//
+		// b) if not algined:
+		//     |   ...  |
+		//     |    x   | <- original stack top (not aligned)
+		//     |    0   | <- pop flag (aligned)
+		//
+		printf("  mov rax, rsp\n");
+		printf("  mov rdi, 16\n");
+		printf("  cqo\n");
+		printf("  idiv rdi\n");
+		printf("  mov rax, 0\n");  // pop flag
+		printf("  cmp rdi, 0\n");
+		int seq = labelseq++;
+		printf("  jne .Lprecall%d\n", seq);
+		// if aligned, push a '0' as padding and 1 as pop flag
+		printf("  push 0\n");
+		printf("  mov rax, 1\n");
+		printf(".Lprecall%d:\n", seq);
+		// if not aligned, push 0 as pop flag
+		printf("  push rax\n");
+
+		for (int i = n - 1; 0 <= i; i--) {
+			gen(node->args->data[i]);
+			switch (i) {
+				case 5:
+					printf("  pop r9\n");
+					break;
+				case 4:
+					printf("  pop r8\n");
+					break;
+				case 3:
+					printf("  pop rcx\n");
+					break;
+				case 2:
+					printf("  pop rdx\n");
+					break;
+				case 1:
+					printf("  pop rsi\n");
+					break;
+				case 0:
+					printf("  pop rdi\n");
+					break;
+			}
+		}
+
 		printf("  call %s\n", node->name);
+		// if pop flag is true, remove padding 0.
+		printf("  pop rdi\n");  // pop flag
+		printf("  cmp rdi, 0\n");
+		printf("  je .Lpostcall%d\n", seq);
+		printf("  pop rdi\n");
+		printf(".Lpostcall%d:\n", seq);
 		printf("  push rax\n");
 		return;
 	}
