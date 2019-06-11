@@ -435,7 +435,7 @@ int var_offset(char *name) {
 //   add        = mul ("+" mul | "-" mul)*
 //   mul        = unary ("*" unary | "/" unary)*
 //   unary      = ("+" | "-")? term
-//   term       = num | "(" expr ")"
+//   term       = identifier ("(" expr ("," expr)* ")")? | num | "(" expr ")"
 
 Node *expr();
 
