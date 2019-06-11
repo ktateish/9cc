@@ -14,7 +14,7 @@ This repositry is my implementation of 9cc based on [his book '低レイヤを�
     * [x] Comparison operators
     * [x] Support arbitrary length input
 * [x] Separated compilation
-* [ ] Variables and functions
+* [x] Variables and functions
     * [x] Single character local variables
     * [x] Support `return` statement
     * [x] Multi-character local variables
@@ -24,7 +24,7 @@ This repositry is my implementation of 9cc based on [his book '低レイヤを�
         * for
     * [x] Block
     * [x] Function call
-    * [ ] Function definition
+    * [x] Function definition
 * [ ] Pointer and string literal
 
 [1]: https://github.com/rui314/9cc

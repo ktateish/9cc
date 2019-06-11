@@ -112,5 +112,9 @@ try 28 "main() { a = buz(1, 2, 3, 4, 5, 6) + 7; return a; }"
 
 try 4 "f() { return 2; } main() { return 2 * f(); }"
 
+try 25 "f(a) { return a*a; } main() { return f(3) + f(4); }"
+try 28 "f(a1, a2, a3, a4, a5, a6) { return a1 + a2 + a3 + a4 + a5 + a6; } main() { return f(1, 2, 3, 4, 5, 6) + 7; }"
+try 55 "fib(n) { if (n == 0) return 0; if (n == 1) return 1; return fib(n-1) + fib(n-2); }  main() { return fib(10); }"
+
 
 echo OK

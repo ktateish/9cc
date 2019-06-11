@@ -25,10 +25,38 @@ void gen(Node *node) {
 
 	if (node->ty == ND_DEFINE_FUNC) {
 		printf("%s:\n", node->name);
+		var_use(node->vars);
 		// Prologue
 		printf("  push rbp\n");
 		printf("  mov rbp, rsp\n");
 		printf("  sub rsp, %d\n", var_offset(NULL));
+		for (int i = 0; i < node->nr_params; i++) {
+			switch (i) {
+				case 5:
+					printf("  mov [rbp-48], r9\n");
+					break;
+				case 4:
+					printf("  mov [rbp-40], r8\n");
+					break;
+				case 3:
+					printf("  mov [rbp-32], rcx\n");
+					break;
+				case 2:
+					printf("  mov [rbp-24], rdx\n");
+					break;
+				case 1:
+					printf("  mov [rbp-16], rsi\n");
+					break;
+				case 0:
+					printf("  mov [rbp-8], rdi\n");
+					break;
+				default:
+					fprintf(stderr,
+						"function parameters more than "
+						"6 is not supported\n");
+					exit(1);
+			}
+		}
 		gen(node->body);
 		return;
 	}

@@ -59,6 +59,17 @@ void tokenize(char *p);
 // position for parser
 extern int pos;
 
+// variables
+typedef struct Var {
+	struct Var *next;
+	char *name;
+	int offset;
+} Var;
+
+void var_use(Var *vars);
+void var_put(char *name);
+int var_offset(char *name);
+
 // node types
 enum NodeType {
 	ND_NUM = 256,
@@ -84,21 +95,14 @@ typedef struct Node {
 
 	Vector *stmts;  // for ND_BLOCK
 	Vector *args;   // for ND_FUNCALL
+
+	Var *vars;      // for ND_DEFINE_FUNC
+	int nr_params;  // for ND_DEFINE_FUNC
 } Node;
 
 void dump_nodes();
 Node *code(int i);
 void program();
-
-// variables
-typedef struct Var {
-	struct Var *next;
-	char *name;
-	int offset;
-} Var;
-
-void var_put(char *name);
-int var_offset(char *name);
 
 //
 // Code Generator

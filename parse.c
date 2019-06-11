@@ -235,10 +235,12 @@ Node *new_node(int node_type, Node *lhs, Node *rhs) {
 	return nd;
 }
 
-Node *new_node_define_func(char *name, Node *body) {
+Node *new_node_define_func(char *name, int nr_params, Var *vars, Node *body) {
 	Node *nd = malloc(sizeof(Node));
 	nd->ty = ND_DEFINE_FUNC;
 	nd->name = name;
+	nd->vars = vars;
+	nd->nr_params = nr_params;
 	nd->body = body;
 	return nd;
 }
@@ -411,6 +413,15 @@ Var *new_var(Var *next, char *name, int offset) {
 }
 
 void init_variables() { variables = variables_sentinel = new_var(NULL, "", 0); }
+
+void var_use(Var *vars) {
+	variables = vars;
+	Var *p = vars;
+	while (p->next != NULL) {
+		p = p->next;
+	}
+	variables_sentinel = p;
+}
 
 void var_put(char *name) {
 	variables = new_var(variables, name, variables->offset + 8);
@@ -663,13 +674,23 @@ Node *definition() {
 	if (tokens(pos)->ty != TK_IDENT) {
 		error_at(tokens(pos)->input, "not an identifier");
 	}
+
 	char *name = tokens(pos++)->name;
+	init_variables();
+
 	if (!consume('(')) {
 		error_at(tokens(pos)->input, "not '('");
 	}
 	if (!consume(')')) {
-		error_at(tokens(pos)->input, "not ')'");
+		var_put(tokens(pos++)->name);
+		while (!consume(')')) {
+			if (!consume(',')) {
+				error_at(tokens(pos)->input, "',' not found");
+			}
+			var_put(tokens(pos++)->name);
+		}
 	}
+	int nr_params = var_offset(NULL) / 8;
 
 	if (!consume('{')) {
 		error_at(tokens(pos)->input, "not '{'");
@@ -679,12 +700,14 @@ Node *definition() {
 		vec_push(body, stmt());
 	}
 
-	return new_node_define_func(name, new_node_block(body));
+	Node *node = new_node_define_func(name, nr_params, variables,
+					  new_node_block(body));
+	variables = NULL;
+	return node;
 }
 
 void program() {
 	init_code();
-	init_variables();
 	while (tokens(pos)->ty != TK_EOF) {
 		push_code(definition());
 	}
