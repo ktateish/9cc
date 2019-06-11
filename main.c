@@ -27,26 +27,17 @@ int main(int argc, char **argv) {
 
 	// output first part assembry
 	printf(".intel_syntax noprefix\n");
-	printf(".global main\n");
-	printf("main:\n");
-
-	// Prologue
-	printf("  push rbp\n");
-	printf("  mov rbp, rsp\n");
-	printf("  sub rsp, %d\n", var_offset(NULL));
+	for (int i = 0; code(i) != NULL; i++) {
+		if (code(i)->ty == ND_DEFINE_FUNC) {
+			printf(".global %s\n", code(i)->name);
+		}
+	}
+	printf("\n");
 
 	// Generate code
 	for (int i = 0; code(i) != NULL; i++) {
 		gen(code(i));
-		printf("  pop rax\n");
 	}
-
-	// Epilogue
-	// The value of the expression will be on the top of the stack
-	// load it to rax and let it be return value.
-	printf("  mov rsp, rbp\n");
-	printf("  pop rbp\n");
-	printf("  ret\n");
 
 	return 0;
 }

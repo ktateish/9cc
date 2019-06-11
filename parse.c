@@ -235,6 +235,14 @@ Node *new_node(int node_type, Node *lhs, Node *rhs) {
 	return nd;
 }
 
+Node *new_node_define_func(char *name, Node *body) {
+	Node *nd = malloc(sizeof(Node));
+	nd->ty = ND_DEFINE_FUNC;
+	nd->name = name;
+	nd->body = body;
+	return nd;
+}
+
 Node *new_node_block(Vector *stmts) {
 	Node *nd = malloc(sizeof(Node));
 	nd->ty = ND_BLOCK;
@@ -421,7 +429,8 @@ int var_offset(char *name) {
 }
 
 // Syntax:
-//   program    = stmt*
+//   program    = definition*
+//   definition = identifier "(" (expr ("," expr)*)? ")" "{" stmt* "}"
 //   stmt       = expr ";"
 //		| "{" stmt* "}"
 //		| "if" "(" expr ")" stmt ("else" stmt)?
@@ -435,7 +444,8 @@ int var_offset(char *name) {
 //   add        = mul ("+" mul | "-" mul)*
 //   mul        = unary ("*" unary | "/" unary)*
 //   unary      = ("+" | "-")? term
-//   term       = identifier ("(" expr ("," expr)* ")")? | num | "(" expr ")"
+//   term       = identifier ("(" (expr ("," expr)*)? ")")? | num | "(" expr ")"
+//   identifier = [A-Za-z_][0-9A-Za-z]*
 
 Node *expr();
 
@@ -649,11 +659,34 @@ Node *stmt() {
 	return node;
 }
 
+Node *definition() {
+	if (tokens(pos)->ty != TK_IDENT) {
+		error_at(tokens(pos)->input, "not an identifier");
+	}
+	char *name = tokens(pos++)->name;
+	if (!consume('(')) {
+		error_at(tokens(pos)->input, "not '('");
+	}
+	if (!consume(')')) {
+		error_at(tokens(pos)->input, "not ')'");
+	}
+
+	if (!consume('{')) {
+		error_at(tokens(pos)->input, "not '{'");
+	}
+	Vector *body = new_vector();
+	while (!consume('}')) {
+		vec_push(body, stmt());
+	}
+
+	return new_node_define_func(name, new_node_block(body));
+}
+
 void program() {
 	init_code();
 	init_variables();
 	while (tokens(pos)->ty != TK_EOF) {
-		push_code(stmt());
+		push_code(definition());
 	}
 	push_code(NULL);
 }

@@ -23,6 +23,16 @@ void gen(Node *node) {
 		return;
 	}
 
+	if (node->ty == ND_DEFINE_FUNC) {
+		printf("%s:\n", node->name);
+		// Prologue
+		printf("  push rbp\n");
+		printf("  mov rbp, rsp\n");
+		printf("  sub rsp, %d\n", var_offset(NULL));
+		gen(node->body);
+		return;
+	}
+
 	if (node->ty == ND_BLOCK) {
 		for (int i = 0; i < node->stmts->len; i++) {
 			gen(node->stmts->data[i]);

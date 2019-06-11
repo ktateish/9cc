@@ -38,76 +38,79 @@ EOM
 	fi
 }
 
-try 0 "0;"
-try 42 "42;"
-try 21 "5+20-4;"
-try 41 " 12 + 34 - 5;"
-try 47 "5+6*7;"
-try 15 "5*(9-6);"
-try 4 "(3+5)/2;"
-try 2 "-3 + 5;"
-try 3 "11 + -(3 + 5);"
-try 4 "19 + -3 * +5;"
+try 0 "main() { return 0; }"
+try 42 "main() { return 42; }"
+try 21 "main() { return 5+20-4; }"
+try 41 "main() { return  12 + 34 - 5; }"
+try 47 "main() { return 5+6*7; }"
+try 15 "main() { return 5*(9-6); }"
+try 4 "main() { return (3+5)/2; }"
+try 2 "main() { return -3 + 5; }"
+try 3 "main() { return 11 + -(3 + 5); }"
+try 4 "main() { return 19 + -3 * +5; }"
 
-try 1 "1 + 2 == 3 - 0;"
-try 0 "1 + 2 == 3 + 4;"
+try 1 "main() { return 1 + 2 == 3 - 0; }"
+try 0 "main() { return 1 + 2 == 3 + 4; }"
 
-try 1 "2 * 3 != 4 / 5;"
-try 0 "2 * 3 != 6;"
+try 1 "main() { return 2 * 3 != 4 / 5; }"
+try 0 "main() { return 2 * 3 != 6; }"
 
-try 1 "2 < 3;"
-try 0 "3 < 2;"
+try 1 "main() { return 2 < 3; }"
+try 0 "main() { return 3 < 2; }"
 
-try 1 "3 <= 3;"
-try 1 "3 <= 4;"
-try 0 "5 <= 4;"
+try 1 "main() { return 3 <= 3; }"
+try 1 "main() { return 3 <= 4; }"
+try 0 "main() { return 5 <= 4; }"
 
-try 0 "2 > 3;"
-try 1 "3 > 2;"
+try 0 "main() { return 2 > 3; }"
+try 1 "main() { return 3 > 2; }"
 
-try 1 "3 >= 3;"
-try 0 "3 >= 4;"
-try 1 "5 >= 4;"
+try 1 "main() { return 3 >= 3; }"
+try 0 "main() { return 3 >= 4; }"
+try 1 "main() { return 5 >= 4; }"
 
-try 7 "1+2; 3+4;"
+try 7 "main() { 1+2; return 3+4; }"
 
-try 11 "a=5; b=6; a+b;"
-try 36 "a=2; b=3; 3*5; a = a*b; a = a*a;3+5;a;"
+try 11 "main() { a=5; b=6; return a+b; }"
+try 36 "main() { a=2; b=3; 3*5; a = a*b; a = a*a;3+5; return a; }"
 
-try 3 "return 3;"
-try 3 "return 3; return 5;"
+try 3 "main() { return 3; }"
+try 3 "main() { return 3; return 5; }"
 
-try 3 "foo = 3; foo;"
-try 6 "foo = 1; bar = 2 + 3; return foo + bar;"
+try 3 "main() { foo = 3; return foo; }"
+try 6 "main() { foo = 1; bar = 2 + 3; return foo + bar; }"
 
-try 3 "if (1) return 3; return 5;"
-try 5 "if (0) return 3; return 5;"
+try 3 "main() { if (1) return 3; return 5; }"
+try 5 "main() { if (0) return 3; return 5; }"
 
-try 1 "foo = 0; if (1+1) foo = 1; return foo;"
-try 0 "foo = 0; if (1-1) foo = 1; return foo;"
+try 1 "main() { foo = 0; if (1+1) foo = 1; return foo; }"
+try 0 "main() { foo = 0; if (1-1) foo = 1; return foo; }"
 
-try 8 "foo = 2; if (1) foo = foo*2; bar = foo+foo; return bar;"
+try 8 "main() { foo = 2; if (1) foo = foo*2; bar = foo+foo; return bar; }"
 
-try 7 "if (0) return 3; if (0) return 5; return 7;"
-try 7 "if (0) return 3; if (0) return 5; return 7;"
+try 7 "main() { if (0) return 3; if (0) return 5; return 7; }"
+try 7 "main() { if (0) return 3; if (0) return 5; return 7; }"
 
-try 3 "if (1) return 3; else return 5; return 7;"
-try 5 "if (0) return 3; else return 5; return 7;"
+try 3 "main() { if (1) return 3; else return 5; return 7; }"
+try 5 "main() { if (0) return 3; else return 5; return 7; }"
 
-try 0 "foo = 0; while (0) foo = foo+1; return foo;"
-try 5 "foo = 0; while (foo < 5) foo = foo+1; return foo;"
+try 0 "main() { foo = 0; while (0) foo = foo+1; return foo; }"
+try 5 "main() { foo = 0; while (foo < 5) foo = foo+1; return foo; }"
 
-try 5 "for (;;) return 5;"
-try 4 "foo = 0; for (i = 0; i < 5; i = i+1) foo = i; return foo;"
+try 5 "main() { for (;;) return 5; }"
+try 4 "main() { foo = 0; for (i = 0; i < 5; i = i+1) foo = i; return foo; }"
 
-try 5 "{ return 5; }"
-try 5 "for (;;) { return 5; }"
-try 5 "foo = 0; i = 0; while (i < 5) { foo = foo+1; i = i+1; } return foo;"
+try 5 "main() { { return 5; } }"
+try 5 "main() { for (;;) { return 5; } }"
+try 5 "main() { foo = 0; i = 0; while (i < 5) { foo = foo+1; i = i+1; } return foo; }"
 
-try 8 "bar = 3; return foo() + bar;"
+try 8 "main() { bar = 3; return foo() + bar; }"
 
-try 9 "a = 2; return bar(a) + 5;"
-try 28 "return buz(1, 2, 3, 4, 5, 6) + 7;"
-try 28 "a = buz(1, 2, 3, 4, 5, 6) + 7; return a;"
+try 9 "main() { a = 2; return bar(a) + 5; }"
+try 28 "main() { return buz(1, 2, 3, 4, 5, 6) + 7; }"
+try 28 "main() { a = buz(1, 2, 3, 4, 5, 6) + 7; return a; }"
+
+try 4 "f() { return 2; } main() { return 2 * f(); }"
+
 
 echo OK
