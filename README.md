@@ -26,6 +26,20 @@ This repositry is my implementation of 9cc based on [his book '低レイヤを�
     * [x] Function call
     * [x] Function definition
 * [ ] Pointer and string literal
+    * [ ] Introduce 'int' keyword instead of implicit type declaration
+    * [ ] Support pointer type
+    * [ ] Pointer addition/subtraction
+    * [ ] Support `sizeof` operator
+    * [ ] Support array type
+    * [ ] Index of array
+    * [ ] Global variables
+    * [ ] Support `char *` type
+    * [ ] String literal
+    * [ ] Input from file
+    * [ ] Line comment and block comment
+    * [ ] Rewrite tests in C
+* [ ] Executable image and initialization expression
+* [ ] Syntax of types in C
 
 [1]: https://github.com/rui314/9cc
 [2]: https://www.sigbus.info/compilerbook
