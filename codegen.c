@@ -268,63 +268,48 @@ void gen_binary_operator(Node *node) {
 			printf("  setle al\n");
 			printf("  movzb rax, al\n");
 			break;
+		default:
+			error("unknown binary operator: %c", node->ty);
 	}
 	printf("  push rax\n");
 }
 
 void gen(Node *node) {
-	if (node->ty == ND_NUM) {
-		printf("  push %d\n", node->val);
-		return;
+	switch (node->ty) {
+		case ND_NUM:
+			printf("  push %d\n", node->val);
+			break;
+		case ND_DEFINE_FUNC:
+			gen_define_func(node);
+			break;
+		case ND_BLOCK:
+			for (int i = 0; i < node->stmts->len; i++) {
+				gen(node->stmts->data[i]);
+				printf("  pop rax\n");
+			}
+			break;
+		case ND_FUNCALL:
+			gen_funcall(node);
+			break;
+		case ND_IF:
+			gen_if(node);
+			break;
+		case ND_WHILE:
+			gen_while(node);
+			break;
+		case ND_FOR:
+			gen_for(node);
+			break;
+		case ND_RETURN:
+			gen_return(node);
+			break;
+		case ND_IDENT:
+			gen_ident(node);
+			break;
+		case '=':
+			gen_assign(node);
+			break;
+		default:
+			gen_binary_operator(node);
 	}
-
-	if (node->ty == ND_DEFINE_FUNC) {
-		gen_define_func(node);
-		return;
-	}
-
-	if (node->ty == ND_BLOCK) {
-		for (int i = 0; i < node->stmts->len; i++) {
-			gen(node->stmts->data[i]);
-			printf("  pop rax\n");
-		}
-		return;
-	}
-
-	if (node->ty == ND_FUNCALL) {
-		gen_funcall(node);
-		return;
-	}
-
-	if (node->ty == ND_IF) {
-		gen_if(node);
-		return;
-	}
-
-	if (node->ty == ND_WHILE) {
-		gen_while(node);
-		return;
-	}
-
-	if (node->ty == ND_FOR) {
-		gen_for(node);
-		return;
-	}
-
-	if (node->ty == ND_RETURN) {
-		gen_return(node);
-		return;
-	}
-
-	if (node->ty == ND_IDENT) {
-		gen_ident(node);
-		return;
-	}
-
-	if (node->ty == '=') {
-		gen_assign(node);
-		return;
-	}
-
-	gen_binary_operator(node);
 }
