@@ -73,6 +73,7 @@ try 7 "main() { 1+2; return 3+4; }"
 
 try 11 "main() { a=5; b=6; return a+b; }"
 try 36 "main() { a=2; b=3; 3*5; a = a*b; a = a*a;3+5; return a; }"
+try 2 "main() { a = b = 2; return a; }"
 
 try 3 "main() { return 3; }"
 try 3 "main() { return 3; return 5; }"

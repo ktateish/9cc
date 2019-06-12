@@ -587,7 +587,7 @@ Node *assign() {
 
 	for (;;) {
 		if (consume('=')) {
-			node = new_node('=', node, equality());
+			node = new_node('=', node, assign());
 		} else {
 			return node;
 		}
