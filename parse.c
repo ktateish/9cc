@@ -306,6 +306,14 @@ void dump_node(Node *node, int level) {
 	fprintf(stderr, "%*s--\n", level * 2, "");
 	fprintf(stderr, "%*sNode: ", level * 2, "");
 	switch (node->ty) {
+		case ND_DEFINE_FUNC:
+			fprintf(stderr, "DEFINE_FUNC\n");
+			fprintf(stderr, "%*sName: %s\n", level * 2, "",
+				node->name);
+			fprintf(stderr, "%*sNumber of Params: %d\n", level * 2,
+				"", node->nr_params);
+			dump_node_rec(node->body, level + 1);
+			break;
 		case ND_BLOCK:
 			fprintf(stderr, "BLOCK\n");
 			for (int i = 0; i < node->stmts->len; i++) {
