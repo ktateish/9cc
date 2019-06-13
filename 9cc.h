@@ -30,6 +30,7 @@ enum TokenType {
 	TK_NE,
 	TK_LE,
 	TK_GE,
+	TK_INT,
 };
 
 // token

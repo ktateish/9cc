@@ -86,6 +86,9 @@ void dump_token(Token *t) {
 			fprintf(stderr, "NUMBER\n");
 			fprintf(stderr, "Value: %d\n", t->val);
 			break;
+		case TK_INT:
+			fprintf(stderr, "INT\n");
+			break;
 		default:
 			fprintf(stderr, "%c\n", t->ty);
 	}
@@ -162,6 +165,12 @@ void tokenize(char *p) {
 		if (strncmp(p, "return", 6) == 0 && !is_alnum(p[6])) {
 			push_token(new_token(TK_RETURN, p));
 			p += 6;
+			continue;
+		}
+
+		if (strncmp(p, "int", 3) == 0 && !is_alnum(p[3])) {
+			push_token(new_token(TK_INT, p));
+			p += 3;
 			continue;
 		}
 
@@ -468,6 +477,7 @@ void dump_vars(Var *vars, int level) {
 //		| "while" "(" expr ")" stmt
 //		| "for" "(" expr? ";" expr? ";" expr? ";" ")" stmt
 //		| "return" expr ";"
+//		| "int" identifier ";"
 //   expr       = assign
 //   assign       = equality (= equality)?
 //   equality   = relational ("==" relational | "!=" relational)*
@@ -494,11 +504,12 @@ Node *term() {
 	}
 
 	if (tokens(pos)->ty == TK_IDENT) {
-		char *name = tokens(pos++)->name;
+		Token *tk = tokens(pos++);
+		char *name = tk->name;
 		if (!consume('(')) {
 			// variables
 			if (var_offset(name) == -1) {
-				var_put(name);
+				error_at(tk->input, "undefined identifier");
 			}
 			return new_node_ident(name);
 		}
@@ -610,6 +621,22 @@ Node *expr() { return assign(); }
 
 Node *stmt() {
 	Node *node;
+
+	if (consume(TK_INT)) {
+		if (tokens(pos)->ty != TK_IDENT) {
+			error_at(tokens(pos)->input, "not an identifier");
+		}
+		char *name = tokens(pos++)->name;
+		// variables
+		if (var_offset(name) != -1) {
+			error_at(tokens(pos)->input, "duplicate definition");
+		}
+		var_put(name);
+		if (!consume(';')) {
+			error_at(tokens(pos)->input, "not ';'");
+		}
+		return stmt();
+	}
 
 	if (consume('{')) {
 		Vector *ss = new_vector();
