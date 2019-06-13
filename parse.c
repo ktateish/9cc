@@ -302,6 +302,7 @@ Node *new_node_ident(char *name) {
 }
 
 void dump_node_rec(Node *node, int level);
+void dump_vars(Var *vars, int level);
 void dump_node(Node *node, int level) {
 	fprintf(stderr, "%*s--\n", level * 2, "");
 	fprintf(stderr, "%*sNode: ", level * 2, "");
@@ -312,6 +313,9 @@ void dump_node(Node *node, int level) {
 				node->name);
 			fprintf(stderr, "%*sNumber of Params: %d\n", level * 2,
 				"", node->nr_params);
+			fprintf(stderr, "%*sVars:\n", level * 2, "");
+			dump_vars(node->vars, level + 1);
+			fprintf(stderr, "%*s--\n", level * 2, "");
 			dump_node_rec(node->body, level + 1);
 			break;
 		case ND_BLOCK:
@@ -445,6 +449,14 @@ int var_offset(char *name) {
 		}
 	}
 	return -1;
+}
+
+void dump_vars(Var *vars, int level) {
+	for (Var *p = vars; p->next != NULL; p = p->next) {
+		fprintf(stderr, "%*s--\n", level * 2, "");
+		fprintf(stderr, "%*sVar: %s\n", level * 2, "", p->name);
+		fprintf(stderr, "%*sOffset: %d\n", level * 2, "", p->offset);
+	}
 }
 
 // Syntax:
