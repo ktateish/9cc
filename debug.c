@@ -69,8 +69,10 @@ void dump_node(Node *node, int level) {
 			fprintf(stderr, "DEFINE_FUNC\n");
 			fprintf(stderr, "%*sName: %s\n", level * 2, "",
 				node->name);
-			fprintf(stderr, "%*sNumber of Params: %d\n", level * 2,
-				"", node->nr_params);
+			fprintf(stderr, "%*sParams:\n", level * 2, "");
+			for (int i = 0; i < node->params->len; i++) {
+				dump_node_rec(node->params->data[i], level + 1);
+			}
 			fprintf(stderr, "%*sVars:\n", level * 2, "");
 			dump_vars(node->vars, level + 1);
 			fprintf(stderr, "%*s--\n", level * 2, "");

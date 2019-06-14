@@ -29,7 +29,7 @@ void gen_define_func(Node *node) {
 	printf("  push rbp\n");
 	printf("  mov rbp, rsp\n");
 	printf("  sub rsp, %d\n", var_offset(NULL));
-	for (int i = 0; i < node->nr_params; i++) {
+	for (int i = 0; i < node->params->len; i++) {
 		switch (i) {
 			case 5:
 				printf("  mov [rbp-48], r9\n");

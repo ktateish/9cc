@@ -109,8 +109,8 @@ typedef struct Node {
 	Vector *stmts;  // for ND_BLOCK
 	Vector *args;   // for ND_FUNCALL
 
-	Var *vars;      // for ND_DEFINE_FUNC
-	int nr_params;  // for ND_DEFINE_FUNC
+	Vector *params;  // for ND_DEFINE_FUNC
+	Var *vars;       // for ND_DEFINE_FUNC
 } Node;
 
 void dump_nodes();

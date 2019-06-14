@@ -24,12 +24,12 @@ Node *new_node(int node_type, Node *lhs, Node *rhs) {
 	return nd;
 }
 
-Node *new_node_define_func(char *name, int nr_params, Var *vars, Node *body) {
+Node *new_node_define_func(char *name, Vector *params, Var *vars, Node *body) {
 	Node *nd = malloc(sizeof(Node));
 	nd->ty = ND_DEFINE_FUNC;
 	nd->name = name;
 	nd->vars = vars;
-	nd->nr_params = nr_params;
+	nd->params = params;
 	nd->body = body;
 	return nd;
 }
@@ -412,14 +412,29 @@ Node *stmt() {
 	return node;
 }
 
-void params() {
+Vector *define_func_params() {
+	Vector *prms = new_vector();
+
+	if (!consume('(')) {
+		error_at(tokens(pos)->input, "not '('");
+	}
+
+	if (consume(')')) {
+		return prms;
+	}
+
 	if (!consume(TK_INT)) {
 		error_at(tokens(pos)->input, "not 'int'");
 	}
 	if (tokens(pos)->ty != TK_IDENT) {
 		error_at(tokens(pos)->input, "not an identifier");
 	}
-	var_put(tokens(pos++)->name);
+
+	char *name = tokens(pos++)->name;
+	Node *node = new_node_define_int_var(name);
+	vec_push(prms, node);
+
+	var_put(name);
 
 	while (!consume(')')) {
 		if (!consume(',')) {
@@ -431,8 +446,12 @@ void params() {
 		if (tokens(pos)->ty != TK_IDENT) {
 			error_at(tokens(pos)->input, "not an identifier");
 		}
-		var_put(tokens(pos++)->name);
+		name = tokens(pos++)->name;
+		node = new_node_define_int_var(name);
+		vec_push(prms, node);
+		var_put(name);
 	}
+	return prms;
 }
 
 Node *define_func() {
@@ -447,13 +466,7 @@ Node *define_func() {
 	char *name = tokens(pos++)->name;
 	init_variables();
 
-	if (!consume('(')) {
-		error_at(tokens(pos)->input, "not '('");
-	}
-	if (!consume(')')) {
-		params();
-	}
-	int nr_params = var_offset(NULL) / 8;
+	Vector *params = define_func_params();
 
 	if (!consume('{')) {
 		error_at(tokens(pos)->input, "not '{'");
@@ -463,8 +476,8 @@ Node *define_func() {
 		vec_push(body, stmt());
 	}
 
-	Node *node = new_node_define_func(name, nr_params, variables,
-					  new_node_block(body));
+	Node *node =
+	    new_node_define_func(name, params, variables, new_node_block(body));
 	variables = NULL;
 	return node;
 }
