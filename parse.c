@@ -470,7 +470,9 @@ void dump_vars(Var *vars, int level) {
 
 // Syntax:
 //   program    = definition*
-//   definition = identifier "(" (expr ("," expr)*)? ")" "{" stmt* "}"
+//   definition = define_func
+//   define_func = "int" identifier "(" params? ")" "{" stmt* "}"
+//   params = "int" expr ("," "int" expr)*
 //   stmt       = expr ";"
 //		| "{" stmt* "}"
 //		| "if" "(" expr ")" stmt ("else" stmt)?
@@ -717,7 +719,30 @@ Node *stmt() {
 	return node;
 }
 
-Node *definition() {
+void params() {
+	if (!consume(TK_INT)) {
+		error_at(tokens(pos)->input, "not 'int'");
+	}
+	if (tokens(pos)->ty != TK_IDENT) {
+		error_at(tokens(pos)->input, "not an identifier");
+	}
+	var_put(tokens(pos++)->name);
+
+	while (!consume(')')) {
+		if (!consume(',')) {
+			error_at(tokens(pos)->input, "',' not found");
+		}
+		if (!consume(TK_INT)) {
+			error_at(tokens(pos)->input, "not 'int'");
+		}
+		if (tokens(pos)->ty != TK_IDENT) {
+			error_at(tokens(pos)->input, "not an identifier");
+		}
+		var_put(tokens(pos++)->name);
+	}
+}
+
+Node *define_func() {
 	if (!consume(TK_INT)) {
 		error_at(tokens(pos)->input, "not 'int'");
 	}
@@ -733,27 +758,7 @@ Node *definition() {
 		error_at(tokens(pos)->input, "not '('");
 	}
 	if (!consume(')')) {
-		if (!consume(TK_INT)) {
-			error_at(tokens(pos)->input, "not 'int'");
-		}
-		if (tokens(pos)->ty != TK_IDENT) {
-			error_at(tokens(pos)->input, "not an identifier");
-		}
-		var_put(tokens(pos++)->name);
-
-		while (!consume(')')) {
-			if (!consume(',')) {
-				error_at(tokens(pos)->input, "',' not found");
-			}
-			if (!consume(TK_INT)) {
-				error_at(tokens(pos)->input, "not 'int'");
-			}
-			if (tokens(pos)->ty != TK_IDENT) {
-				error_at(tokens(pos)->input,
-					 "not an identifier");
-			}
-			var_put(tokens(pos++)->name);
-		}
+		params();
 	}
 	int nr_params = var_offset(NULL) / 8;
 
@@ -770,6 +775,8 @@ Node *definition() {
 	variables = NULL;
 	return node;
 }
+
+Node *definition() { return define_func(); }
 
 void program() {
 	init_code();
