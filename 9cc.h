@@ -42,6 +42,7 @@ typedef struct {
 } Token;
 
 void init_tokens();
+Token *tokens(int i);
 void dump_tokens();
 
 // function for reporting an error
