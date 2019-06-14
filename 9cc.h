@@ -93,10 +93,17 @@ enum NodeType {
 };
 
 typedef struct Node {
-	int ty;  // operator or ND_NUM
-	struct Node *lhs, *rhs, *cond, *thenc, *elsec, *init, *update, *body;
-	int val;     // for ND_NUM
-	char *name;  // for ND_IDENT
+	int ty;  // node type
+
+	struct Node *lhs, *rhs;      // for binary/unary operators
+	struct Node *cond;	   // for ND_IF, ND_WHILE, ND_FOR
+	struct Node *thenc, *elsec;  // for ND_IF syntax
+	struct Node *init, *update;  // for ND_FOR syntax
+	struct Node *body;	   // for ND_DEFINE_FUNC, ND_WHILE, ND_FOR
+
+	int val;  // for ND_NUM
+
+	char *name;  // for ND_IDENT, ND_DEFINE_FUNC
 
 	Vector *stmts;  // for ND_BLOCK
 	Vector *args;   // for ND_FUNCALL
