@@ -59,6 +59,11 @@ void gen_define_func(Node *node) {
 	gen(node->body);
 }
 
+void gen_define_int_var(Node *node) {
+	printf("  push 1000000007\n");
+	return;
+}
+
 void gen_funcall(Node *node) {
 	if (node->ty != ND_FUNCALL) {
 		error("not function call");
@@ -281,6 +286,9 @@ void gen(Node *node) {
 			break;
 		case ND_DEFINE_FUNC:
 			gen_define_func(node);
+			break;
+		case ND_DEFINE_INT_VAR:
+			gen_define_int_var(node);
 			break;
 		case ND_BLOCK:
 			for (int i = 0; i < node->stmts->len; i++) {

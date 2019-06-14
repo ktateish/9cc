@@ -34,6 +34,13 @@ Node *new_node_define_func(char *name, int nr_params, Var *vars, Node *body) {
 	return nd;
 }
 
+Node *new_node_define_int_var(char *name) {
+	Node *nd = malloc(sizeof(Node));
+	nd->ty = ND_DEFINE_INT_VAR;
+	nd->name = name;
+	return nd;
+}
+
 Node *new_node_block(Vector *stmts) {
 	Node *nd = malloc(sizeof(Node));
 	nd->ty = ND_BLOCK;
@@ -387,7 +394,7 @@ Node *stmt_define_int_var() {
 	if (!consume(';')) {
 		error_at(tokens(pos)->input, "not ';'");
 	}
-	return stmt();
+	return new_node_define_int_var(name);
 }
 
 Node *stmt() {

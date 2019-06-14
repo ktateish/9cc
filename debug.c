@@ -76,6 +76,11 @@ void dump_node(Node *node, int level) {
 			fprintf(stderr, "%*s--\n", level * 2, "");
 			dump_node_rec(node->body, level + 1);
 			break;
+		case ND_DEFINE_INT_VAR:
+			fprintf(stderr, "DEFINE_INT_VAR\n");
+			fprintf(stderr, "%*sName: %s\n", level * 2, "",
+				node->name);
+			break;
 		case ND_BLOCK:
 			fprintf(stderr, "BLOCK\n");
 			for (int i = 0; i < node->stmts->len; i++) {
