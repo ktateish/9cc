@@ -44,24 +44,6 @@ void push_token(Token *t) { vec_push(token_vec, t); }
 
 Token *tokens(int i) { return token_vec->data[i]; }
 
-// function for reporting an error
-void error(char *fmt, ...) {
-	va_list ap;
-	va_start(ap, fmt);
-	vfprintf(stderr, fmt, ap);
-	fprintf(stderr, "\n");
-	exit(1);
-}
-
-// function for reporting error location
-void error_at(char *loc, char *msg) {
-	int pos = loc - user_input;
-	fprintf(stderr, "%s\n", user_input);
-	fprintf(stderr, "%*s", pos, "");
-	fprintf(stderr, "^ %s\n", msg);
-	exit(1);
-}
-
 int is_alpha(int c) {
 	return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || (c == '_');
 }

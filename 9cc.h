@@ -16,6 +16,9 @@ void vec_push(Vector *vec, void *elem);
 // Tokenizer
 //
 
+// input
+extern char *user_input;
+
 // token types
 enum TokenType {
 	TK_NUM = 256,  // integer
