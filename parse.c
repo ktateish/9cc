@@ -297,98 +297,108 @@ Node *assign() {
 
 Node *expr() { return assign(); }
 
-Node *stmt() {
-	Node *node;
+Node *stmt();
 
-	if (consume(TK_INT)) {
-		if (tokens(pos)->ty != TK_IDENT) {
-			error_at(tokens(pos)->input, "not an identifier");
-		}
-		char *name = tokens(pos++)->name;
-		// variables
-		if (var_offset(name) != -1) {
-			error_at(tokens(pos)->input, "duplicate definition");
-		}
-		var_put(name);
+Node *stmt_block() {
+	Vector *ss = new_vector();
+	while (!consume('}')) {
+		vec_push(ss, stmt());
+	}
+	return new_node_block(ss);
+}
+
+Node *stmt_if() {
+	if (!consume('(')) {
+		error_at(tokens(pos)->input, "not '('");
+	}
+	Node *cond = expr();
+	if (!consume(')')) {
+		error_at(tokens(pos)->input, "not ')'");
+	}
+	Node *thenc = stmt();
+	Node *elsec = NULL;
+	if (consume(TK_ELSE)) {
+		elsec = stmt();
+	}
+	return new_node_if(cond, thenc, elsec);
+}
+
+Node *stmt_while() {
+	if (!consume('(')) {
+		error_at(tokens(pos)->input, "not '('");
+	}
+	Node *cond = expr();
+	if (!consume(')')) {
+		error_at(tokens(pos)->input, "not ')'");
+	}
+	return new_node_while(cond, stmt());
+}
+
+Node *stmt_for() {
+	if (!consume('(')) {
+		error_at(tokens(pos)->input, "not '('");
+	}
+
+	Node *init = NULL;
+	if (!consume(';')) {
+		init = expr();
 		if (!consume(';')) {
 			error_at(tokens(pos)->input, "not ';'");
 		}
-		return stmt();
 	}
 
-	if (consume('{')) {
-		Vector *ss = new_vector();
-		while (!consume('}')) {
-			vec_push(ss, stmt());
+	Node *cond = NULL;
+	if (!consume(';')) {
+		cond = expr();
+		if (!consume(';')) {
+			error_at(tokens(pos)->input, "not ';'");
 		}
-		return new_node_block(ss);
 	}
 
-	if (consume(TK_IF)) {
-		if (!consume('(')) {
-			error_at(tokens(pos)->input, "not '('");
-		}
-		Node *cond = expr();
+	Node *update = NULL;
+	if (!consume(')')) {
+		update = expr();
 		if (!consume(')')) {
 			error_at(tokens(pos)->input, "not ')'");
 		}
-		Node *thenc = stmt();
-		Node *elsec = NULL;
-		if (consume(TK_ELSE)) {
-			elsec = stmt();
-		}
-		return new_node_if(cond, thenc, elsec);
 	}
 
-	if (consume(TK_WHILE)) {
-		if (!consume('(')) {
-			error_at(tokens(pos)->input, "not '('");
-		}
-		Node *cond = expr();
-		if (!consume(')')) {
-			error_at(tokens(pos)->input, "not ')'");
-		}
-		return new_node_while(cond, stmt());
+	return new_node_for(init, cond, update, stmt());
+}
+
+Node *stmt_return() {
+	Node *node = new_node(ND_RETURN, expr(), NULL);
+	if (!consume(';')) {
+		error_at(tokens(pos)->input, "not ';'");
 	}
+	return node;
+}
 
-	if (consume(TK_FOR)) {
-		if (!consume('(')) {
-			error_at(tokens(pos)->input, "not '('");
-		}
-
-		Node *init = NULL;
-		if (!consume(';')) {
-			init = expr();
-			if (!consume(';')) {
-				error_at(tokens(pos)->input, "not ';'");
-			}
-		}
-
-		Node *cond = NULL;
-		if (!consume(';')) {
-			cond = expr();
-			if (!consume(';')) {
-				error_at(tokens(pos)->input, "not ';'");
-			}
-		}
-
-		Node *update = NULL;
-		if (!consume(')')) {
-			update = expr();
-			if (!consume(')')) {
-				error_at(tokens(pos)->input, "not ')'");
-			}
-		}
-
-		return new_node_for(init, cond, update, stmt());
+Node *stmt_define_int_var() {
+	if (tokens(pos)->ty != TK_IDENT) {
+		error_at(tokens(pos)->input, "not an identifier");
 	}
-
-	if (consume(TK_RETURN)) {
-		node = new_node(ND_RETURN, expr(), NULL);
-	} else {
-		node = expr();
+	char *name = tokens(pos++)->name;
+	// variables
+	if (var_offset(name) != -1) {
+		error_at(tokens(pos)->input, "duplicate definition");
 	}
+	var_put(name);
+	if (!consume(';')) {
+		error_at(tokens(pos)->input, "not ';'");
+	}
+	return stmt();
+}
 
+Node *stmt() {
+	if (consume(TK_INT)) return stmt_define_int_var();
+	if (consume('{')) return stmt_block();
+	if (consume(TK_IF)) return stmt_if();
+	if (consume(TK_WHILE)) return stmt_while();
+	if (consume(TK_FOR)) return stmt_for();
+	if (consume(TK_RETURN)) return stmt_return();
+
+	Node *node = expr();
 	if (!consume(';')) {
 		error_at(tokens(pos)->input, "not ';'");
 	}
