@@ -718,6 +718,10 @@ Node *stmt() {
 }
 
 Node *definition() {
+	if (!consume(TK_INT)) {
+		error_at(tokens(pos)->input, "not 'int'");
+	}
+
 	if (tokens(pos)->ty != TK_IDENT) {
 		error_at(tokens(pos)->input, "not an identifier");
 	}
@@ -729,10 +733,24 @@ Node *definition() {
 		error_at(tokens(pos)->input, "not '('");
 	}
 	if (!consume(')')) {
+		if (!consume(TK_INT)) {
+			error_at(tokens(pos)->input, "not 'int'");
+		}
+		if (tokens(pos)->ty != TK_IDENT) {
+			error_at(tokens(pos)->input, "not an identifier");
+		}
 		var_put(tokens(pos++)->name);
+
 		while (!consume(')')) {
 			if (!consume(',')) {
 				error_at(tokens(pos)->input, "',' not found");
+			}
+			if (!consume(TK_INT)) {
+				error_at(tokens(pos)->input, "not 'int'");
+			}
+			if (tokens(pos)->ty != TK_IDENT) {
+				error_at(tokens(pos)->input,
+					 "not an identifier");
 			}
 			var_put(tokens(pos++)->name);
 		}
