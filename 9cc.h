@@ -71,9 +71,7 @@ typedef struct Var {
 	int offset;
 } Var;
 
-void init_variables();
 void var_use(Var *vars);
-void var_put(char *name);
 int var_offset(char *name);
 
 // node types

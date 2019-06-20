@@ -1,10 +1,8 @@
 // vim:set filetype=c tabstop=8 shiftwidth=8 noexpandtab:
-#define _POSIX_C_SOURCE 200809L
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "9cc.h"
 
@@ -113,44 +111,6 @@ int consume(int ty) {
 	}
 	pos++;
 	return 1;
-}
-
-Var *variables;
-Var *variables_sentinel;
-
-Var *new_var(Var *next, char *name, int offset) {
-	Var *var = malloc(sizeof(Var));
-	var->next = next;
-	var->name = name;
-	var->offset = offset;
-	return var;
-}
-
-void init_variables() { variables = variables_sentinel = new_var(NULL, "", 0); }
-
-void var_use(Var *vars) {
-	variables = vars;
-	Var *p = vars;
-	while (p->next != NULL) {
-		p = p->next;
-	}
-	variables_sentinel = p;
-}
-
-void var_put(char *name) {
-	variables = new_var(variables, name, variables->offset + 8);
-}
-
-int var_offset(char *name) {
-	if (name == NULL) {
-		return variables->offset;
-	}
-	for (Var *p = variables; p != variables_sentinel; p = p->next) {
-		if (strcmp(p->name, name) == 0) {
-			return p->offset;
-		}
-	}
-	return -1;
 }
 
 // Syntax:
