@@ -194,7 +194,7 @@ Node *term() {
 		if (!consume('(')) {
 			// variables
 			if (var_offset(name) == -1) {
-				error_at(tk->input, "undefined identifier");
+				// error_at(tk->input, "undefined identifier");
 			}
 			return new_node_ident(name);
 		}
