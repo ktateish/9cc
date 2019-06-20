@@ -34,10 +34,11 @@ Node *new_node_define_func(char *name, Vector *params, Var *vars, Node *body) {
 	return nd;
 }
 
-Node *new_node_define_int_var(char *name) {
+Node *new_node_define_int_var(char *name, char *input) {
 	Node *nd = malloc(sizeof(Node));
 	nd->ty = ND_DEFINE_INT_VAR;
 	nd->name = name;
+	nd->input = input;
 	return nd;
 }
 
@@ -90,10 +91,11 @@ Node *new_node_num(int val) {
 	return nd;
 }
 
-Node *new_node_ident(char *name) {
+Node *new_node_ident(char *name, char *input) {
 	Node *nd = malloc(sizeof(Node));
 	nd->ty = ND_IDENT;
 	nd->name = name;
+	nd->input = input;
 	return nd;
 }
 
@@ -191,12 +193,13 @@ Node *term() {
 	if (tokens(pos)->ty == TK_IDENT) {
 		Token *tk = tokens(pos++);
 		char *name = tk->name;
+		char *input = tk->input;
 		if (!consume('(')) {
 			// variables
 			if (var_offset(name) == -1) {
 				// error_at(tk->input, "undefined identifier");
 			}
-			return new_node_ident(name);
+			return new_node_ident(name, input);
 		}
 
 		// function call
@@ -385,16 +388,18 @@ Node *stmt_define_int_var() {
 	if (tokens(pos)->ty != TK_IDENT) {
 		error_at(tokens(pos)->input, "not an identifier");
 	}
-	char *name = tokens(pos++)->name;
+	Token *tk = tokens(pos++);
+	char *name = tk->name;
+	char *input = tk->input;
 	// variables
 	if (var_offset(name) != -1) {
-		error_at(tokens(pos)->input, "duplicate definition");
+		error_at(input, "duplicate definition");
 	}
 	var_put(name);
 	if (!consume(';')) {
 		error_at(tokens(pos)->input, "not ';'");
 	}
-	return new_node_define_int_var(name);
+	return new_node_define_int_var(name, input);
 }
 
 Node *stmt() {
@@ -430,11 +435,11 @@ Vector *define_func_params() {
 		error_at(tokens(pos)->input, "not an identifier");
 	}
 
-	char *name = tokens(pos++)->name;
-	Node *node = new_node_define_int_var(name);
+	Token *tk = tokens(pos++);
+	Node *node = new_node_define_int_var(tk->name, tk->input);
 	vec_push(prms, node);
 
-	var_put(name);
+	var_put(tk->name);
 
 	while (!consume(')')) {
 		if (!consume(',')) {
@@ -446,10 +451,10 @@ Vector *define_func_params() {
 		if (tokens(pos)->ty != TK_IDENT) {
 			error_at(tokens(pos)->input, "not an identifier");
 		}
-		name = tokens(pos++)->name;
-		node = new_node_define_int_var(name);
+		tk = tokens(pos++);
+		node = new_node_define_int_var(tk->name, tk->input);
 		vec_push(prms, node);
-		var_put(name);
+		var_put(tk->name);
 	}
 	return prms;
 }

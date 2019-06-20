@@ -9,11 +9,14 @@ void sema_rec(Node *node) {
 	if (node == NULL) return;
 	switch (node->ty) {
 		case ND_DEFINE_INT_VAR:
+			if (var_offset(node->name) != -1) {
+				error_at(node->input, "duplicate definition");
+			}
 			var_put(node->name);
 			return;
 		case ND_IDENT:
 			if (var_offset(node->name) == -1) {
-				error("unknown variable: %s", node->name);
+				error_at(node->input, "unknown variable");
 			}
 			return;
 		case ND_BLOCK:

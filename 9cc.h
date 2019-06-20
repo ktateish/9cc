@@ -112,6 +112,8 @@ typedef struct Node {
 
 	Vector *params;  // for ND_DEFINE_FUNC
 	Var *vars;       // for ND_DEFINE_FUNC
+
+	char *input;  // for ND_DEFINE_INT_VAR, ND_IDENT
 } Node;
 
 void dump_nodes();
