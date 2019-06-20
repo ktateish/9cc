@@ -196,9 +196,6 @@ Node *term() {
 		char *input = tk->input;
 		if (!consume('(')) {
 			// variables
-			if (var_offset(name) == -1) {
-				// error_at(tk->input, "undefined identifier");
-			}
 			return new_node_ident(name, input);
 		}
 
@@ -392,10 +389,6 @@ Node *stmt_define_int_var() {
 	char *name = tk->name;
 	char *input = tk->input;
 	// variables
-	if (var_offset(name) != -1) {
-		error_at(input, "duplicate definition");
-	}
-	var_put(name);
 	if (!consume(';')) {
 		error_at(tokens(pos)->input, "not ';'");
 	}
@@ -439,8 +432,6 @@ Vector *define_func_params() {
 	Node *node = new_node_define_int_var(tk->name, tk->input);
 	vec_push(prms, node);
 
-	var_put(tk->name);
-
 	while (!consume(')')) {
 		if (!consume(',')) {
 			error_at(tokens(pos)->input, "',' not found");
@@ -454,7 +445,6 @@ Vector *define_func_params() {
 		tk = tokens(pos++);
 		node = new_node_define_int_var(tk->name, tk->input);
 		vec_push(prms, node);
-		var_put(tk->name);
 	}
 	return prms;
 }
@@ -469,7 +459,6 @@ Node *define_func() {
 	}
 
 	char *name = tokens(pos++)->name;
-	init_variables();
 
 	Vector *params = define_func_params();
 
@@ -482,8 +471,7 @@ Node *define_func() {
 	}
 
 	Node *node =
-	    new_node_define_func(name, params, variables, new_node_block(body));
-	variables = NULL;
+	    new_node_define_func(name, params, NULL, new_node_block(body));
 	return node;
 }
 
