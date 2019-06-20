@@ -64,11 +64,18 @@ void tokenize(char *p);
 // position for parser
 extern int pos;
 
+// types
+typedef struct Type {
+	enum { INT, PTR } ty;
+	struct Type *ptr_to;
+} Type;
+
 // variables
 typedef struct Var {
 	struct Var *next;
 	char *name;
 	int offset;
+	Type *tp;
 } Var;
 
 void var_use(Var *vars);
@@ -110,6 +117,8 @@ typedef struct Node {
 
 	Vector *params;  // for ND_DEFINE_FUNC
 	Var *vars;       // for ND_DEFINE_FUNC
+
+	Type *tp;  // for ND_IDENT
 
 	char *input;  // for ND_DEFINE_INT_VAR, ND_IDENT
 } Node;

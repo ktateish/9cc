@@ -13,6 +13,20 @@
 // position for parser
 int pos;
 
+// Type types
+Type *new_int_type() {
+	Type *tp = malloc(sizeof(Type));
+	tp->ty = INT;
+	return tp;
+}
+
+Type *new_ptr_type(Type *ptr_to) {
+	Type *tp = malloc(sizeof(Type));
+	tp->ty = PTR;
+	tp->ptr_to = ptr_to;
+	return tp;
+}
+
 // node types
 Node *new_node(int node_type, Node *lhs, Node *rhs) {
 	Node *nd = malloc(sizeof(Node));
@@ -32,10 +46,11 @@ Node *new_node_define_func(char *name, Vector *params, Var *vars, Node *body) {
 	return nd;
 }
 
-Node *new_node_define_int_var(char *name, char *input) {
+Node *new_node_define_int_var(char *name, Type *tp, char *input) {
 	Node *nd = malloc(sizeof(Node));
 	nd->ty = ND_DEFINE_INT_VAR;
 	nd->name = name;
+	nd->tp = tp;
 	nd->input = input;
 	return nd;
 }
@@ -124,7 +139,7 @@ int consume(int ty) {
 //		| "while" "(" expr ")" stmt
 //		| "for" "(" expr? ";" expr? ";" expr? ";" ")" stmt
 //		| "return" expr ";"
-//		| "int" identifier ";"
+//		| "int" "*"* identifier ";"
 //   expr       = assign
 //   assign       = equality (= equality)?
 //   equality   = relational ("==" relational | "!=" relational)*
@@ -352,7 +367,7 @@ Node *stmt_define_int_var() {
 	if (!consume(';')) {
 		error_at(tokens(pos)->input, "not ';'");
 	}
-	return new_node_define_int_var(name, input);
+	return new_node_define_int_var(name, new_int_type(), input);
 }
 
 Node *stmt() {
@@ -389,7 +404,8 @@ Vector *define_func_params() {
 	}
 
 	Token *tk = tokens(pos++);
-	Node *node = new_node_define_int_var(tk->name, tk->input);
+	Node *node =
+	    new_node_define_int_var(tk->name, new_int_type(), tk->input);
 	vec_push(prms, node);
 
 	while (!consume(')')) {
@@ -403,7 +419,8 @@ Vector *define_func_params() {
 			error_at(tokens(pos)->input, "not an identifier");
 		}
 		tk = tokens(pos++);
-		node = new_node_define_int_var(tk->name, tk->input);
+		node = new_node_define_int_var(tk->name, new_int_type(),
+					       tk->input);
 		vec_push(prms, node);
 	}
 	return prms;
