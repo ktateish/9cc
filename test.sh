@@ -11,22 +11,18 @@ try() {
 	expected="$1"
 	input="$2"
 
-	cat <<EOM > foo.c
-int foo() { return 5; }
-EOM
+	cat <<EOM > external.c
+int ex1() { return 5; }
 
-	cat <<EOM > bar.c
-int bar(int a) { return a * 2; }
-EOM
+int ex2(int a) { return a * 2; }
 
-	cat <<EOM > buz.c
-int buz(int a1, int a2, int a3, int a4, int a5, int a6) {
+int ex3(int a1, int a2, int a3, int a4, int a5, int a6) {
 	return a1 + a2 + a3 + a4 + a5 + a6;
 }
 EOM
 
 	./9cc "$input" > tmp.s
-	gcc -o tmp  tmp.s foo.c bar.c buz.c
+	gcc -o tmp  tmp.s external.c
 	./tmp
 	actual="$?"
 
@@ -105,11 +101,11 @@ try 5 "int main() { { return 5; } }"
 try 5 "int main() { for (;;) { return 5; } }"
 try 5 "int main() { int foo; int i; foo = 0; i = 0; while (i < 5) { foo = foo+1; i = i+1; } return foo; }"
 
-try 8 "int main() { int bar; bar = 3; return foo() + bar; }"
+try 8 "int main() { int bar; bar = 3; return ex1() + bar; }"
 
-try 9 "int main() { int a; a = 2; return bar(a) + 5; }"
-try 28 "int main() { return buz(1, 2, 3, 4, 5, 6) + 7; }"
-try 28 "int main() { int a; a = buz(1, 2, 3, 4, 5, 6) + 7; return a; }"
+try 9 "int main() { int a; a = 2; return ex2(a) + 5; }"
+try 28 "int main() { return ex3(1, 2, 3, 4, 5, 6) + 7; }"
+try 28 "int main() { int a; a = ex3(1, 2, 3, 4, 5, 6) + 7; return a; }"
 
 try 4 "int f() { return 2; } int main() { return 2 * f(); }"
 
