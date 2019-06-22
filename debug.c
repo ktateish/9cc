@@ -67,16 +67,22 @@ void dump_node(Node *node, int level) {
 	switch (node->ty) {
 		case ND_DEREF:
 			fprintf(stderr, "DEREF\n");
+			fprintf(stderr, "%*sType: %s\n", level * 2, "",
+				type_name(node->tp));
 			dump_node_rec(node->lhs, level + 1);
 			break;
 		case ND_ENREF:
 			fprintf(stderr, "ENREF\n");
+			fprintf(stderr, "%*sType: %s\n", level * 2, "",
+				type_name(node->tp));
 			dump_node_rec(node->lhs, level + 1);
 			break;
 		case ND_DEFINE_FUNC:
 			fprintf(stderr, "DEFINE_FUNC\n");
 			fprintf(stderr, "%*sName: %s\n", level * 2, "",
 				node->name);
+			fprintf(stderr, "%*sType: %s\n", level * 2, "",
+				type_name(node->tp));
 			fprintf(stderr, "%*sParams:\n", level * 2, "");
 			for (int i = 0; i < node->params->len; i++) {
 				dump_node_rec(node->params->data[i], level + 1);
@@ -90,6 +96,8 @@ void dump_node(Node *node, int level) {
 			fprintf(stderr, "DEFINE_INT_VAR\n");
 			fprintf(stderr, "%*sName: %s\n", level * 2, "",
 				node->name);
+			fprintf(stderr, "%*sType: %s\n", level * 2, "",
+				type_name(node->tp));
 			break;
 		case ND_BLOCK:
 			fprintf(stderr, "BLOCK\n");
@@ -122,35 +130,49 @@ void dump_node(Node *node, int level) {
 			break;
 		case ND_RETURN:
 			fprintf(stderr, "RETURN\n");
+			fprintf(stderr, "%*sType: %s\n", level * 2, "",
+				type_name(node->tp));
 			dump_node_rec(node->lhs, level + 1);
 			break;
 		case ND_IDENT:
 			fprintf(stderr, "IDENT\n");
 			fprintf(stderr, "%*sName: %s\n", level * 2, "",
 				node->name);
+			fprintf(stderr, "%*sType: %s\n", level * 2, "",
+				type_name(node->tp));
 			break;
 		case ND_EQ:
 			fprintf(stderr, "'=='\n");
+			fprintf(stderr, "%*sType: %s\n", level * 2, "",
+				type_name(node->tp));
 			dump_node_rec(node->lhs, level + 1);
 			dump_node_rec(node->rhs, level + 1);
 			break;
 		case ND_NE:
 			fprintf(stderr, "'!='\n");
+			fprintf(stderr, "%*sType: %s\n", level * 2, "",
+				type_name(node->tp));
 			dump_node_rec(node->lhs, level + 1);
 			dump_node_rec(node->rhs, level + 1);
 			break;
 		case ND_LE:
 			fprintf(stderr, "'<='\n");
+			fprintf(stderr, "%*sType: %s\n", level * 2, "",
+				type_name(node->tp));
 			dump_node_rec(node->lhs, level + 1);
 			dump_node_rec(node->rhs, level + 1);
 			break;
 		case ND_NUM:
 			fprintf(stderr, "NUMBER\n");
+			fprintf(stderr, "%*sType: %s\n", level * 2, "",
+				type_name(node->tp));
 			fprintf(stderr, "%*sValue: %d\n", level * 2, "",
 				node->val);
 			break;
 		default:
 			fprintf(stderr, "%c\n", node->ty);
+			fprintf(stderr, "%*sType: %s\n", level * 2, "",
+				type_name(node->tp));
 			dump_node_rec(node->lhs, level + 1);
 			dump_node_rec(node->rhs, level + 1);
 			break;
@@ -174,6 +196,8 @@ void dump_vars(Var *vars, int level) {
 	for (Var *p = vars; p->next != NULL; p = p->next) {
 		fprintf(stderr, "%*s--\n", level * 2, "");
 		fprintf(stderr, "%*sVar: %s\n", level * 2, "", p->name);
+		fprintf(stderr, "%*sType: %s\n", level * 2, "",
+			type_name(p->tp));
 		fprintf(stderr, "%*sOffset: %d\n", level * 2, "", p->offset);
 	}
 }
