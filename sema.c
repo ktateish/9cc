@@ -9,15 +9,18 @@
 Var *variables;
 Var *variables_sentinel;
 
-Var *new_var(Var *next, char *name, int offset) {
+Var *new_var(Var *next, char *name, int offset, Type *tp) {
 	Var *var = malloc(sizeof(Var));
 	var->next = next;
 	var->name = name;
 	var->offset = offset;
+	var->tp = tp;
 	return var;
 }
 
-void init_variables() { variables = variables_sentinel = new_var(NULL, "", 0); }
+void init_variables() {
+	variables = variables_sentinel = new_var(NULL, "", 0, NULL);
+}
 
 void var_use(Var *vars) {
 	variables = vars;
@@ -28,8 +31,8 @@ void var_use(Var *vars) {
 	variables_sentinel = p;
 }
 
-void var_put(char *name) {
-	variables = new_var(variables, name, variables->offset + 8);
+void var_put(char *name, Type *tp) {
+	variables = new_var(variables, name, variables->offset + 8, tp);
 }
 
 Var *var_get(char *name) {
@@ -53,13 +56,14 @@ void sema_rec(Node *node) {
 			if (var_get(node->name) != NULL) {
 				error_at(node->input, "duplicate definition");
 			}
-			var_put(node->name);
+			var_put(node->name, node->tp);
 			return;
 		case ND_IDENT:
 			v = var_get(node->name);
 			if (v == NULL) {
 				error_at(node->input, "unknown variable");
 			}
+			node->tp = v->tp;
 			return;
 		case ND_BLOCK:
 			for (int i = 0; i < node->stmts->len; i++) {
