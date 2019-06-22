@@ -26,8 +26,8 @@ This repositry is my implementation of 9cc based on [his book '低レイヤを�
     * [x] Function call
     * [x] Function definition
 * [ ] Pointer and string literal
-    * [ ] Introduce 'int' keyword instead of implicit type declaration
-    * [ ] Support pointer type
+    * [x] Introduce 'int' keyword instead of implicit type declaration
+    * [x] Support pointer type
     * [ ] Pointer addition/subtraction
     * [ ] Support `sizeof` operator
     * [ ] Support array type
