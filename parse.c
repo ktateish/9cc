@@ -51,6 +51,7 @@ Node *new_node(int node_type, Node *lhs, Node *rhs) {
 	nd->ty = node_type;
 	nd->lhs = lhs;
 	nd->rhs = rhs;
+	nd->tp = NULL;
 	return nd;
 }
 
@@ -61,6 +62,7 @@ Node *new_node_define_func(char *name, Vector *params, Var *vars, Node *body) {
 	nd->vars = vars;
 	nd->params = params;
 	nd->body = body;
+	nd->tp = NULL;
 	return nd;
 }
 
@@ -77,6 +79,7 @@ Node *new_node_block(Vector *stmts) {
 	Node *nd = malloc(sizeof(Node));
 	nd->ty = ND_BLOCK;
 	nd->stmts = stmts;
+	nd->tp = NULL;
 	return nd;
 }
 
@@ -85,6 +88,7 @@ Node *new_node_funcall(char *name, Vector *args) {
 	nd->ty = ND_FUNCALL;
 	nd->name = name;
 	nd->args = args;
+	nd->tp = NULL;
 	return nd;
 }
 
@@ -94,6 +98,7 @@ Node *new_node_if(Node *cond, Node *thenc, Node *elsec) {
 	nd->cond = cond;
 	nd->thenc = thenc;
 	nd->elsec = elsec;
+	nd->tp = NULL;
 	return nd;
 }
 
@@ -102,6 +107,7 @@ Node *new_node_while(Node *cond, Node *body) {
 	nd->ty = ND_WHILE;
 	nd->cond = cond;
 	nd->body = body;
+	nd->tp = NULL;
 	return nd;
 }
 
@@ -112,6 +118,7 @@ Node *new_node_for(Node *init, Node *cond, Node *update, Node *body) {
 	nd->cond = cond;
 	nd->update = update;
 	nd->body = body;
+	nd->tp = NULL;
 	return nd;
 }
 
@@ -119,6 +126,7 @@ Node *new_node_num(int val) {
 	Node *nd = malloc(sizeof(Node));
 	nd->ty = ND_NUM;
 	nd->val = val;
+	nd->tp = NULL;
 	return nd;
 }
 
@@ -127,6 +135,7 @@ Node *new_node_ident(char *name, char *input) {
 	nd->ty = ND_IDENT;
 	nd->name = name;
 	nd->input = input;
+	nd->tp = NULL;
 	return nd;
 }
 
