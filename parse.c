@@ -17,20 +17,20 @@ int pos;
 // Type types
 Type *new_type_int() {
 	Type *tp = malloc(sizeof(Type));
-	tp->ty = INT;
+	tp->ty = TP_INT;
 	return tp;
 }
 
 Type *new_type_ptr(Type *ptr_to) {
 	Type *tp = malloc(sizeof(Type));
-	tp->ty = PTR;
+	tp->ty = TP_POINTER;
 	tp->ptr_to = ptr_to;
 	return tp;
 }
 
 Type *new_type_undetermined() {
-	Type *tp = malloc(sizeof(UNDETERMINED));
-	tp->ty = UNDETERMINED;
+	Type *tp = malloc(sizeof(TP_UNDETERMINED));
+	tp->ty = TP_UNDETERMINED;
 	return tp;
 }
 
@@ -39,15 +39,15 @@ char *type_name(Type *tp) {
 		return "unknown";
 	}
 	switch (tp->ty) {
-		case INT:
+		case TP_INT:
 			return "int";
-		case PTR: {
+		case TP_POINTER: {
 			char *src = type_name(tp->ptr_to);
 			char *s = malloc(strlen(src) + 2);
 			sprintf(s, "*%s", src);
 			return s;
 		}
-		case UNDETERMINED:
+		case TP_UNDETERMINED:
 			return "undetermined";
 	}
 	return "unknown";

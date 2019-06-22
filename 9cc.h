@@ -65,10 +65,17 @@ void tokenize(char *p);
 extern int pos;
 
 // types
+enum TypeType {
+	TP_UNDETERMINED,
+	TP_INT,
+	TP_POINTER,
+};
+
 typedef struct Type {
-	enum { UNDETERMINED, INT, PTR } ty;
+	enum TypeType ty;
 	struct Type *ptr_to;
 } Type;
+
 Type *new_type_int();
 Type *new_type_ptr(Type *ptr_to);
 char *type_name(Type *tp);
