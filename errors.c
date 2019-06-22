@@ -16,10 +16,13 @@ void error(char *fmt, ...) {
 }
 
 // function for reporting error location
-void error_at(char *loc, char *msg) {
+void error_at(char *loc, char *fmt, ...) {
 	int pos = loc - user_input;
 	fprintf(stderr, "%s\n", user_input);
-	fprintf(stderr, "%*s", pos, "");
-	fprintf(stderr, "^ %s\n", msg);
+	fprintf(stderr, "%*s^ ", pos, "");
+	va_list ap;
+	va_start(ap, fmt);
+	vfprintf(stderr, fmt, ap);
+	fprintf(stderr, "\n");
 	exit(1);
 }

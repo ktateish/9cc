@@ -52,7 +52,7 @@ void dump_tokens();
 void error(char *fmt, ...);
 
 // function for reporting error location
-void error_at(char *loc, char *msg);
+void error_at(char *loc, char *fmt, ...);
 
 // tokenize a string pointed by user_input and save them to tokens
 void tokenize(char *p);
