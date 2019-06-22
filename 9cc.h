@@ -79,7 +79,7 @@ typedef struct Var {
 } Var;
 
 void var_use(Var *vars);
-int var_offset(char *name);
+Var *var_get(char *name);
 
 // node types
 enum NodeType {

@@ -20,7 +20,11 @@ void gen_lval(Node *node) {
 		return;
 	}
 
-	int offset = var_offset(node->name);
+	Var *v = var_get(node->name);
+	if (v == NULL) {
+		error("unknown variable: %s", node->name);
+	}
+	int offset = v->offset;
 
 	printf("  mov rax, rbp\n");
 	printf("  sub rax, %d\n", offset);
@@ -33,10 +37,11 @@ void gen_define_func(Node *node) {
 	}
 	printf("%s:\n", node->name);
 	var_use(node->vars);
+	Var *v = var_get(NULL);
 	// Prologue
 	printf("  push rbp\n");
 	printf("  mov rbp, rsp\n");
-	printf("  sub rsp, %d\n", var_offset(NULL));
+	printf("  sub rsp, %d\n", v->offset);
 	for (int i = 0; i < node->params->len; i++) {
 		switch (i) {
 			case 5:

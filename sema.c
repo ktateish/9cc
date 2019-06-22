@@ -32,29 +32,32 @@ void var_put(char *name) {
 	variables = new_var(variables, name, variables->offset + 8);
 }
 
-int var_offset(char *name) {
+Var *var_get(char *name) {
 	if (name == NULL) {
-		return variables->offset;
+		return variables;
 	}
 	for (Var *p = variables; p != variables_sentinel; p = p->next) {
 		if (strcmp(p->name, name) == 0) {
-			return p->offset;
+			return p;
 		}
 	}
-	return -1;
+	return NULL;
 }
 
 void sema_rec(Node *node) {
 	if (node == NULL) return;
+
+	Var *v;
 	switch (node->ty) {
 		case ND_DEFINE_INT_VAR:
-			if (var_offset(node->name) != -1) {
+			if (var_get(node->name) != NULL) {
 				error_at(node->input, "duplicate definition");
 			}
 			var_put(node->name);
 			return;
 		case ND_IDENT:
-			if (var_offset(node->name) == -1) {
+			v = var_get(node->name);
+			if (v == NULL) {
 				error_at(node->input, "unknown variable");
 			}
 			return;
