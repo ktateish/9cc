@@ -84,6 +84,8 @@ int var_offset(char *name);
 // node types
 enum NodeType {
 	ND_NUM = 256,
+	ND_DEREF,
+	ND_ENREF,
 	ND_DEFINE_FUNC,
 	ND_DEFINE_INT_VAR,
 	ND_BLOCK,

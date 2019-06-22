@@ -8,8 +8,16 @@ int labelseq;
 void gen(Node *node);
 
 void gen_lval(Node *node) {
-	if (node->ty != ND_IDENT) {
+	if (node->ty != ND_IDENT && node->ty != ND_DEREF) {
 		error("assigning lvalue is not a variable");
+	}
+
+	if (node->ty == ND_DEREF) {
+		gen_lval(node->lhs);
+		printf("  pop rax\n");
+		printf("  mov rax, [rax]\n");
+		printf("  push rax\n");
+		return;
 	}
 
 	int offset = var_offset(node->name);
@@ -210,13 +218,24 @@ void gen_return(Node *node) {
 }
 
 void gen_ident(Node *node) {
-	if (node->ty != ND_IDENT) {
-		error("not identifier");
+	switch (node->ty) {
+		case ND_DEREF:
+		case ND_IDENT:
+			gen_lval(node);
+			printf("  pop rax\n");
+			printf("  mov rax, [rax]\n");
+			printf("  push rax\n");
+			break;
+		case ND_ENREF:
+			node = node->lhs;
+			if (node->ty != ND_IDENT) {
+				error("not identifier");
+			}
+			gen_lval(node);
+			break;
+		default:
+			error("not identifier");
 	}
-	gen_lval(node);
-	printf("  pop rax\n");
-	printf("  mov rax, [rax]\n");
-	printf("  push rax\n");
 }
 
 void gen_assign(Node *node) {
@@ -312,6 +331,8 @@ void gen(Node *node) {
 			gen_return(node);
 			break;
 		case ND_IDENT:
+		case ND_DEREF:
+		case ND_ENREF:
 			gen_ident(node);
 			break;
 		case '=':

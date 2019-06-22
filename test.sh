@@ -117,5 +117,12 @@ try 25 "int f(int a) { return a*a; } int main() { return f(3) + f(4); }"
 try 28 "int f(int a1, int a2, int a3, int a4, int a5, int a6) { return a1 + a2 + a3 + a4 + a5 + a6; } int main() { return f(1, 2, 3, 4, 5, 6) + 7; }"
 try 55 "int fib(int n) { if (n == 0) return 0; if (n == 1) return 1; return fib(n-1) + fib(n-2); }  int main() { return fib(10); }"
 
+try 7 "int main() {int a; int *b; a = 7; b = &a; return *b;}"
+try 8 "int main() {int a; a = 7; int *b; b = &a; *b = *b + 1; return a; }"
+try 8 "int main() {int a; a = 7; int *b; b = &a; int **c; c = &b; **c = **c + 1; return a; }"
+try 8 "int f(int *a) { *a = *a + 1; return 0;} int main() {int b; b = 7; f(&b); return b; }"
+try 9 "int f(int *a) { *a = *a + 1; return 0;} int g(int **b) { **b = **b+1; f(*b); return 0; } int main() {int c; c = 7; int *d; d = &c; g(&d); return c; }"
+
+
 
 echo OK

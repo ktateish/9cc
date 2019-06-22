@@ -147,10 +147,43 @@ int consume(int ty) {
 //   add        = mul ("+" mul | "-" mul)*
 //   mul        = unary ("*" unary | "/" unary)*
 //   unary      = ("+" | "-")? term
-//   term       = identifier ("(" (expr ("," expr)*)? ")")? | num | "(" expr ")"
+//   term       = refspec? identifier ("(" (expr ("," expr)*)? ")")?
+//   		| num
+//   		| "(" expr ")"
 //   identifier = [A-Za-z_][0-9A-Za-z]*
+//   refspec    = "*"* | "&"
 
 Node *expr();
+
+Node *identifier() {
+	if (tokens(pos)->ty != TK_IDENT) {
+		error_at(tokens(pos)->input, "invalid token");
+	}
+	Token *tk = tokens(pos++);
+	char *name = tk->name;
+	char *input = tk->input;
+	if (!consume('(')) {
+		// variables
+		return new_node_ident(name, input);
+	}
+
+	// function call
+	Vector *args = new_vector();
+	if (consume(')')) {
+		// no arguments
+		return new_node_funcall(name, args);
+	}
+
+	// have oen or more arguments
+	vec_push(args, expr());
+	while (!consume(')')) {
+		if (!consume(',')) {
+			error_at(tokens(pos)->input, "',' not found");
+		}
+		vec_push(args, expr());
+	}
+	return new_node_funcall(name, args);
+}
 
 Node *term() {
 	if (consume('(')) {
@@ -166,30 +199,15 @@ Node *term() {
 	}
 
 	if (tokens(pos)->ty == TK_IDENT) {
-		Token *tk = tokens(pos++);
-		char *name = tk->name;
-		char *input = tk->input;
-		if (!consume('(')) {
-			// variables
-			return new_node_ident(name, input);
-		}
+		return identifier();
+	}
 
-		// function call
-		Vector *args = new_vector();
-		if (consume(')')) {
-			// no arguments
-			return new_node_funcall(name, args);
-		}
+	if (consume('*')) {
+		return new_node(ND_DEREF, term(), NULL);
+	}
 
-		// have oen or more arguments
-		vec_push(args, expr());
-		while (!consume(')')) {
-			if (!consume(',')) {
-				error_at(tokens(pos)->input, "',' not found");
-			}
-			vec_push(args, expr());
-		}
-		return new_node_funcall(name, args);
+	if (consume('&')) {
+		return new_node(ND_ENREF, identifier(), NULL);
 	}
 
 	error_at(tokens(pos)->input, "invalid token");
@@ -201,6 +219,10 @@ Node *unary() {
 		return term();
 	} else if (consume('-')) {
 		return new_node('-', new_node_num(0), term());
+	} else if (consume('*')) {
+		return new_node(ND_DEREF, unary(), NULL);
+	} else if (consume('&')) {
+		return new_node(ND_ENREF, term(), NULL);
 	}
 	return term();
 }
@@ -357,6 +379,12 @@ Node *stmt_return() {
 }
 
 Node *stmt_define_int_var() {
+	Type *tp = new_int_type();
+
+	while (consume('*')) {
+		tp = new_ptr_type(tp);
+	}
+
 	if (tokens(pos)->ty != TK_IDENT) {
 		error_at(tokens(pos)->input, "not an identifier");
 	}
@@ -367,7 +395,7 @@ Node *stmt_define_int_var() {
 	if (!consume(';')) {
 		error_at(tokens(pos)->input, "not ';'");
 	}
-	return new_node_define_int_var(name, new_int_type(), input);
+	return new_node_define_int_var(name, tp, input);
 }
 
 Node *stmt() {
@@ -399,13 +427,18 @@ Vector *define_func_params() {
 	if (!consume(TK_INT)) {
 		error_at(tokens(pos)->input, "not 'int'");
 	}
+	Type *tp = new_int_type();
+
+	while (consume('*')) {
+		tp = new_ptr_type(tp);
+	}
+
 	if (tokens(pos)->ty != TK_IDENT) {
 		error_at(tokens(pos)->input, "not an identifier");
 	}
 
 	Token *tk = tokens(pos++);
-	Node *node =
-	    new_node_define_int_var(tk->name, new_int_type(), tk->input);
+	Node *node = new_node_define_int_var(tk->name, tp, tk->input);
 	vec_push(prms, node);
 
 	while (!consume(')')) {
@@ -415,12 +448,18 @@ Vector *define_func_params() {
 		if (!consume(TK_INT)) {
 			error_at(tokens(pos)->input, "not 'int'");
 		}
+
+		tp = new_int_type();
+
+		while (consume('*')) {
+			tp = new_ptr_type(tp);
+		}
+
 		if (tokens(pos)->ty != TK_IDENT) {
 			error_at(tokens(pos)->input, "not an identifier");
 		}
 		tk = tokens(pos++);
-		node = new_node_define_int_var(tk->name, new_int_type(),
-					       tk->input);
+		node = new_node_define_int_var(tk->name, tp, tk->input);
 		vec_push(prms, node);
 	}
 	return prms;

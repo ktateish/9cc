@@ -65,6 +65,14 @@ void dump_node(Node *node, int level) {
 	fprintf(stderr, "%*s--\n", level * 2, "");
 	fprintf(stderr, "%*sNode: ", level * 2, "");
 	switch (node->ty) {
+		case ND_DEREF:
+			fprintf(stderr, "DEREF\n");
+			dump_node_rec(node->lhs, level + 1);
+			break;
+		case ND_ENREF:
+			fprintf(stderr, "ENREF\n");
+			dump_node_rec(node->lhs, level + 1);
+			break;
 		case ND_DEFINE_FUNC:
 			fprintf(stderr, "DEFINE_FUNC\n");
 			fprintf(stderr, "%*sName: %s\n", level * 2, "",
