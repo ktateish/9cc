@@ -14,13 +14,13 @@
 int pos;
 
 // Type types
-Type *new_int_type() {
+Type *new_type_int() {
 	Type *tp = malloc(sizeof(Type));
 	tp->ty = INT;
 	return tp;
 }
 
-Type *new_ptr_type(Type *ptr_to) {
+Type *new_type_ptr(Type *ptr_to) {
 	Type *tp = malloc(sizeof(Type));
 	tp->ty = PTR;
 	tp->ptr_to = ptr_to;
@@ -379,10 +379,10 @@ Node *stmt_return() {
 }
 
 Node *stmt_define_int_var() {
-	Type *tp = new_int_type();
+	Type *tp = new_type_int();
 
 	while (consume('*')) {
-		tp = new_ptr_type(tp);
+		tp = new_type_ptr(tp);
 	}
 
 	if (tokens(pos)->ty != TK_IDENT) {
@@ -427,10 +427,10 @@ Vector *define_func_params() {
 	if (!consume(TK_INT)) {
 		error_at(tokens(pos)->input, "not 'int'");
 	}
-	Type *tp = new_int_type();
+	Type *tp = new_type_int();
 
 	while (consume('*')) {
-		tp = new_ptr_type(tp);
+		tp = new_type_ptr(tp);
 	}
 
 	if (tokens(pos)->ty != TK_IDENT) {
@@ -449,10 +449,10 @@ Vector *define_func_params() {
 			error_at(tokens(pos)->input, "not 'int'");
 		}
 
-		tp = new_int_type();
+		tp = new_type_int();
 
 		while (consume('*')) {
-			tp = new_ptr_type(tp);
+			tp = new_type_ptr(tp);
 		}
 
 		if (tokens(pos)->ty != TK_IDENT) {
