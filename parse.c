@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "9cc.h"
 
@@ -25,6 +26,23 @@ Type *new_type_ptr(Type *ptr_to) {
 	tp->ty = PTR;
 	tp->ptr_to = ptr_to;
 	return tp;
+}
+
+char *type_name(Type *tp) {
+	if (tp == NULL) {
+		return "unknown";
+	}
+	switch (tp->ty) {
+		case INT:
+			return "int";
+		case PTR: {
+			char *src = type_name(tp->ptr_to);
+			char *s = malloc(strlen(src) + 2);
+			sprintf(s, "*%s", src);
+			return s;
+		}
+	}
+	return "unknown";
 }
 
 // node types
