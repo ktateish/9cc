@@ -26,6 +26,7 @@ int main(int argc, char **argv) {
 	// dump_nodes();
 
 	sema();
+	// dump_nodes();
 
 	// output first part assembry
 	printf(".intel_syntax noprefix\n");
