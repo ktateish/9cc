@@ -69,6 +69,8 @@ typedef struct Type {
 	enum { INT, PTR } ty;
 	struct Type *ptr_to;
 } Type;
+Type *new_type_int();
+Type *new_type_ptr(Type *ptr_to);
 
 // variables
 typedef struct Var {
