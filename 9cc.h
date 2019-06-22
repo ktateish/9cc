@@ -66,7 +66,7 @@ extern int pos;
 
 // types
 typedef struct Type {
-	enum { INT, PTR } ty;
+	enum { UNDETERMINED, INT, PTR } ty;
 	struct Type *ptr_to;
 } Type;
 Type *new_type_int();
