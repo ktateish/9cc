@@ -100,29 +100,16 @@ Type *result_type_deref(Type *tp) {
 }
 
 Type *result_type(int op, Type *lhs, Type *rhs) {
-	switch (op) {
-		case '+':
-			return result_type_add(lhs, rhs);
-		case '-':
-			return result_type_sub(lhs, rhs);
-		case '*':
-			return result_type_mul(lhs, rhs);
-		case '/':
-			return result_type_div(lhs, rhs);
-		case '=':
-			return result_type_assign(lhs, rhs);
-		case ND_EQ:
-		case ND_NE:
-		case ND_LE:
-		case '<':
-			return result_type_eq(lhs, rhs);
-		case ND_ENREF:
-			return result_type_enref(lhs);
-		case ND_DEREF:
-			return result_type_deref(lhs);
-		default:
-			return NULL;
-	}
+	if (op == '+') return result_type_add(lhs, rhs);
+	if (op == '-') return result_type_sub(lhs, rhs);
+	if (op == '*') return result_type_mul(lhs, rhs);
+	if (op == '/') return result_type_div(lhs, rhs);
+	if (op == '=') return result_type_assign(lhs, rhs);
+	if (op == ND_EQ || op == ND_NE || op == ND_LE || op == '<')
+		return result_type_eq(lhs, rhs);
+	if (op == ND_ENREF) return result_type_enref(lhs);
+	if (op == ND_DEREF) return result_type_deref(lhs);
+	return NULL;
 }
 
 void sema_rec(Node *node) {
@@ -130,103 +117,105 @@ void sema_rec(Node *node) {
 
 	Var *v;
 	Type *tp;
-	switch (node->ty) {
-		case ND_DEFINE_INT_VAR:
-			if (var_get(node->name) != NULL) {
-				error_at(node->input, "duplicate definition");
-			}
-			var_put(node->name, node->tp);
-			return;
-		case ND_IDENT:
-			v = var_get(node->name);
-			if (v == NULL) {
-				error_at(node->input, "unknown variable");
-			}
-			node->tp = v->tp;
-			return;
-		case ND_BLOCK:
-			for (int i = 0; i < node->stmts->len; i++) {
-				sema_rec(node->stmts->data[i]);
-			}
-			return;
-		case ND_FUNCALL:
-			for (int i = 0; i < node->args->len; i++) {
-				sema_rec(node->args->data[i]);
-			}
-			node->tp = new_type_int();
-			return;
-		case ND_IF:
-			sema_rec(node->cond);
-			sema_rec(node->thenc);
-			sema_rec(node->elsec);
-			return;
-		case ND_WHILE:
-			sema_rec(node->cond);
-			sema_rec(node->body);
-			return;
-		case ND_FOR:
-			sema_rec(node->init);
-			sema_rec(node->cond);
-			sema_rec(node->update);
-			sema_rec(node->body);
-			return;
-		case ND_ENREF:
-			sema_rec(node->lhs);
-			if (node->lhs->ty != ND_IDENT) {
-				error("cannot get address of non-identifier");
-			}
-			tp = result_type_enref(node->lhs->tp);
-			node->tp = tp;
-			return;
-		case ND_DEREF:
-			sema_rec(node->lhs);
-			tp = result_type_deref(node->lhs->tp);
-			if (tp == NULL) {
-				error("cannot derefer non pointer type");
-			}
-			node->tp = tp;
-			return;
-		case ND_RETURN:
-			sema_rec(node->lhs);
-			tp = node->lhs->tp;
-			// XXX: check whether match the returning type of the
-			// function
-			if (tp == NULL || tp->ty == TP_UNDETERMINED) {
-				error("cannot return undetermined type");
-			}
-			node->tp = tp;
-			return;
-		case '=':
-			sema_rec(node->lhs);
-			sema_rec(node->rhs);
-			tp =
-			    result_type(node->ty, node->lhs->tp, node->rhs->tp);
-			if (tp == NULL) {
-				error("type unmatch: lhs: %s, rhs: %s",
-				      type_name(node->lhs->tp),
-				      type_name(node->rhs->tp));
-			}
-			node->tp = tp;
-			return;
-		case ND_NUM:
-			node->tp = new_type_int();
-			return;
-		case ND_EQ:
-		case ND_NE:
-		case ND_LE:
-		default:
-			sema_rec(node->lhs);
-			sema_rec(node->rhs);
-			tp =
-			    result_type(node->ty, node->lhs->tp, node->rhs->tp);
-			if (tp == NULL) {
-				error("type unmatch: lhs: %s, rhs: %s",
-				      type_name(node->lhs->tp),
-				      type_name(node->rhs->tp));
-			}
-			node->tp = tp;
-			return;
+	if (node->ty == ND_DEFINE_INT_VAR) {
+		if (var_get(node->name) != NULL) {
+			error_at(node->input, "duplicate definition");
+		}
+		var_put(node->name, node->tp);
+		return;
 	}
+	if (node->ty == ND_IDENT) {
+		v = var_get(node->name);
+		if (v == NULL) {
+			error_at(node->input, "unknown variable");
+		}
+		node->tp = v->tp;
+		return;
+	}
+	if (node->ty == ND_BLOCK) {
+		for (int i = 0; i < node->stmts->len; i++) {
+			sema_rec(node->stmts->data[i]);
+		}
+		return;
+	}
+	if (node->ty == ND_FUNCALL) {
+		for (int i = 0; i < node->args->len; i++) {
+			sema_rec(node->args->data[i]);
+		}
+		node->tp = new_type_int();
+		return;
+	}
+	if (node->ty == ND_IF) {
+		sema_rec(node->cond);
+		sema_rec(node->thenc);
+		sema_rec(node->elsec);
+		return;
+	}
+	if (node->ty == ND_WHILE) {
+		sema_rec(node->cond);
+		sema_rec(node->body);
+		return;
+	}
+	if (node->ty == ND_FOR) {
+		sema_rec(node->init);
+		sema_rec(node->cond);
+		sema_rec(node->update);
+		sema_rec(node->body);
+		return;
+	}
+	if (node->ty == ND_ENREF) {
+		sema_rec(node->lhs);
+		if (node->lhs->ty != ND_IDENT) {
+			error("cannot get address of non-identifier");
+		}
+		tp = result_type_enref(node->lhs->tp);
+		node->tp = tp;
+		return;
+	}
+	if (node->ty == ND_DEREF) {
+		sema_rec(node->lhs);
+		tp = result_type_deref(node->lhs->tp);
+		if (tp == NULL) {
+			error("cannot derefer non pointer type");
+		}
+		node->tp = tp;
+		return;
+	}
+	if (node->ty == ND_RETURN) {
+		sema_rec(node->lhs);
+		tp = node->lhs->tp;
+		// XXX: check whether match the returning type of the
+		// function
+		if (tp == NULL || tp->ty == TP_UNDETERMINED) {
+			error("cannot return undetermined type");
+		}
+		node->tp = tp;
+		return;
+	}
+	if (node->ty == '=') {
+		sema_rec(node->lhs);
+		sema_rec(node->rhs);
+		tp = result_type(node->ty, node->lhs->tp, node->rhs->tp);
+		if (tp == NULL) {
+			error("type unmatch: lhs: %s, rhs: %s",
+			      type_name(node->lhs->tp),
+			      type_name(node->rhs->tp));
+		}
+		node->tp = tp;
+		return;
+	}
+	if (node->ty == ND_NUM) {
+		node->tp = new_type_int();
+		return;
+	}
+	sema_rec(node->lhs);
+	sema_rec(node->rhs);
+	tp = result_type(node->ty, node->lhs->tp, node->rhs->tp);
+	if (tp == NULL) {
+		error("type unmatch: lhs: %s, rhs: %s",
+		      type_name(node->lhs->tp), type_name(node->rhs->tp));
+	}
+	node->tp = tp;
 }
 
 void sema_toplevel(Node *node) {

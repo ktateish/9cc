@@ -35,21 +35,15 @@ Type *new_type_undetermined() {
 }
 
 char *type_name(Type *tp) {
-	if (tp == NULL) {
-		return "unknown";
+	if (tp == NULL) return "unknown";
+	if (tp->ty == TP_INT) return "int";
+	if (tp->ty == TP_POINTER) {
+		char *src = type_name(tp->ptr_to);
+		char *s = malloc(strlen(src) + 2);
+		sprintf(s, "*%s", src);
+		return s;
 	}
-	switch (tp->ty) {
-		case TP_INT:
-			return "int";
-		case TP_POINTER: {
-			char *src = type_name(tp->ptr_to);
-			char *s = malloc(strlen(src) + 2);
-			sprintf(s, "*%s", src);
-			return s;
-		}
-		case TP_UNDETERMINED:
-			return "undetermined";
-	}
+	if (tp->ty == TP_UNDETERMINED) return "undetermined";
 	return "unknown";
 }
 
