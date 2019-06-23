@@ -36,7 +36,7 @@ void gen_define_func(Node *node) {
 		error("not function definition");
 	}
 	printf("%s:\n", node->name);
-	var_use(node->vars);
+	var_use(node);
 	Var *v = var_get(NULL);
 	// Prologue
 	printf("  push rbp\n");

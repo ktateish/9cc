@@ -88,8 +88,15 @@ typedef struct Var {
 	Type *tp;
 } Var;
 
-void var_use(Var *vars);
+struct Node;
+void var_use(struct Node *node);
 Var *var_get(char *name);
+
+typedef struct Scope {
+	struct Scope *next;
+	Var *vars;
+	Var *sentinel;
+} Scope;
 
 // node types
 enum NodeType {
@@ -129,6 +136,7 @@ typedef struct Node {
 
 	Vector *params;  // for ND_DEFINE_FUNC
 	Var *vars;       // for ND_DEFINE_FUNC
+	Scope *scope;    // for ND_DEFINE_FUNC
 
 	Type *tp;  // for ND_IDENT
 

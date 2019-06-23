@@ -6,6 +6,8 @@
 
 #include "9cc.h"
 
+Scope *scope;
+
 Var *variables;
 Var *variables_sentinel;
 
@@ -22,29 +24,53 @@ void init_variables() {
 	variables = variables_sentinel = new_var(NULL, "", 0, NULL);
 }
 
-void var_use(Var *vars) {
-	variables = vars;
-	Var *p = vars;
+void var_use(Node *node) {
+	variables = node->vars;
+	Var *p = variables;
 	while (p->next != NULL) {
 		p = p->next;
 	}
 	variables_sentinel = p;
+	scope = node->scope;
 }
 
 void var_put(char *name, Type *tp) {
 	variables = new_var(variables, name, variables->offset + 8, tp);
+	scope->vars = new_var(scope->vars, name, scope->vars->offset + 8, tp);
 }
 
 Var *var_get(char *name) {
 	if (name == NULL) {
-		return variables;
+		return scope->vars;
 	}
-	for (Var *p = variables; p != variables_sentinel; p = p->next) {
-		if (strcmp(p->name, name) == 0) {
-			return p;
+	for (Scope *s = scope; s != NULL; s = s->next) {
+		for (Var *p = s->vars; p != s->sentinel; p = p->next) {
+			if (strcmp(p->name, name) == 0) {
+				return p;
+			}
 		}
 	}
 	return NULL;
+}
+
+Scope *new_scope(Scope *next) {
+	Scope *s = malloc(sizeof(Scope));
+	s->next = next;
+	int offset = 0;
+	if (next != NULL) {
+		offset = next->vars->offset;
+	}
+	s->vars = s->sentinel = new_var(NULL, "", offset, NULL);
+	return s;
+}
+
+void init_function_scope() { scope = new_scope(NULL); }
+
+void set_function_scope(Node *node) {
+	if (node->ty != ND_DEFINE_FUNC) {
+		error("Cannot set function scope to non function node");
+	}
+	node->scope = scope;
 }
 
 Type *result_type_add(Type *lhs, Type *rhs) {
@@ -220,12 +246,14 @@ void sema_rec(Node *node) {
 
 void sema_toplevel(Node *node) {
 	if (node->ty == ND_DEFINE_FUNC) {
+		init_function_scope();
 		init_variables();
 		for (int i = 0; i < node->params->len; i++) {
 			sema_rec(node->params->data[i]);
 		}
 		sema_rec(node->body);
 		node->vars = variables;
+		set_function_scope(node);
 	}
 }
 
