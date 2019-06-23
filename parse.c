@@ -57,11 +57,12 @@ Node *new_node(int node_type, Node *lhs, Node *rhs) {
 	return nd;
 }
 
-Node *new_node_define_func(char *name, Vector *params, Var *vars, Node *body) {
+Node *new_node_define_func(char *name, Vector *params, Scope *scope,
+			   Node *body) {
 	Node *nd = malloc(sizeof(Node));
 	nd->ty = ND_DEFINE_FUNC;
 	nd->name = name;
-	nd->vars = vars;
+	nd->scope = scope;
 	nd->params = params;
 	nd->body = body;
 	nd->tp = new_type_undetermined();

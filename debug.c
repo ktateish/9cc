@@ -45,7 +45,7 @@ void dump_tokens() {
 }
 
 void dump_node_rec(Node *node, int level);
-void dump_vars(Var *vars, int level);
+void dump_scope(Scope *scope, int level);
 void dump_node(Node *node, int level) {
 	fprintf(stderr, "%*s--\n", level * 2, "");
 	fprintf(stderr, "%*sNode: ", level * 2, "");
@@ -73,7 +73,7 @@ void dump_node(Node *node, int level) {
 				dump_node_rec(node->params->data[i], level + 1);
 			}
 			fprintf(stderr, "%*sVars:\n", level * 2, "");
-			dump_vars(node->vars, level + 1);
+			dump_scope(node->scope, level + 1);
 			fprintf(stderr, "%*s--\n", level * 2, "");
 			dump_node_rec(node->body, level + 1);
 			break;
@@ -177,12 +177,16 @@ void dump_nodes() {
 	}
 }
 
-void dump_vars(Var *vars, int level) {
-	for (Var *p = vars; p->next != NULL; p = p->next) {
-		fprintf(stderr, "%*s--\n", level * 2, "");
-		fprintf(stderr, "%*sVar: %s\n", level * 2, "", p->name);
-		fprintf(stderr, "%*sType: %s\n", level * 2, "",
-			type_name(p->tp));
-		fprintf(stderr, "%*sOffset: %d\n", level * 2, "", p->offset);
+void dump_scope(Scope *scope, int level) {
+	for (Scope *s = scope; s != NULL; s = s->next) {
+		for (Var *p = s->vars; p->next != NULL; p = p->next) {
+			fprintf(stderr, "%*s--\n", level * 2, "");
+			fprintf(stderr, "%*sVar: %s\n", level * 2, "", p->name);
+			fprintf(stderr, "%*sType: %s\n", level * 2, "",
+				type_name(p->tp));
+			fprintf(stderr, "%*sOffset: %d\n", level * 2, "",
+				p->offset);
+		}
+		level = level + 1;
 	}
 }

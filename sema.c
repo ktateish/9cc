@@ -8,9 +8,6 @@
 
 Scope *scope;
 
-Var *variables;
-Var *variables_sentinel;
-
 Var *new_var(Var *next, char *name, int offset, Type *tp) {
 	Var *var = malloc(sizeof(Var));
 	var->next = next;
@@ -20,22 +17,9 @@ Var *new_var(Var *next, char *name, int offset, Type *tp) {
 	return var;
 }
 
-void init_variables() {
-	variables = variables_sentinel = new_var(NULL, "", 0, NULL);
-}
-
-void var_use(Node *node) {
-	variables = node->vars;
-	Var *p = variables;
-	while (p->next != NULL) {
-		p = p->next;
-	}
-	variables_sentinel = p;
-	scope = node->scope;
-}
+void var_use(Node *node) { scope = node->scope; }
 
 void var_put(char *name, Type *tp) {
-	variables = new_var(variables, name, variables->offset + 8, tp);
 	scope->vars = new_var(scope->vars, name, scope->vars->offset + 8, tp);
 }
 
@@ -247,12 +231,10 @@ void sema_rec(Node *node) {
 void sema_toplevel(Node *node) {
 	if (node->ty == ND_DEFINE_FUNC) {
 		init_function_scope();
-		init_variables();
 		for (int i = 0; i < node->params->len; i++) {
 			sema_rec(node->params->data[i]);
 		}
 		sema_rec(node->body);
-		node->vars = variables;
 		set_function_scope(node);
 	}
 }

@@ -135,7 +135,6 @@ typedef struct Node {
 	Vector *args;   // for ND_FUNCALL
 
 	Vector *params;  // for ND_DEFINE_FUNC
-	Var *vars;       // for ND_DEFINE_FUNC
 	Scope *scope;    // for ND_DEFINE_FUNC
 
 	Type *tp;  // for ND_IDENT
