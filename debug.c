@@ -84,6 +84,8 @@ void dump_node(Node *node, int level) {
 			type_name(node->tp));
 	} else if (node->ty == ND_BLOCK) {
 		fprintf(stderr, "BLOCK\n");
+		fprintf(stderr, "%*sVars:\n", level * 2, "");
+		dump_scope(node->scope, level + 1);
 		for (int i = 0; i < node->stmts->len; i++) {
 			dump_node_rec(node->stmts->data[i], level + 1);
 		}
