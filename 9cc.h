@@ -11,6 +11,7 @@ typedef struct {
 
 Vector *new_vector();
 void vec_push(Vector *vec, void *elem);
+char *string_join(Vector *strings, char *sep);
 
 //
 // Tokenizer
