@@ -102,6 +102,7 @@ typedef struct Scope {
 	Var *sentinel;
 } Scope;
 
+void init_global_scope();
 Scope *scope_use(Scope *scope);
 void dump_scope(Scope *scope, int level);
 

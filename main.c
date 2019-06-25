@@ -22,6 +22,7 @@ int main(int argc, char **argv) {
 	// dump_tokens();
 
 	// Parse tokens
+	init_global_scope();
 	program();
 	// dump_nodes();
 

@@ -6,6 +6,7 @@
 
 #include "9cc.h"
 
+Scope *global_scope;
 Scope *scope;
 int max_offset;
 
@@ -21,7 +22,11 @@ Var *new_var(Var *next, char *name, int offset, Type *tp) {
 void var_use(Node *node) { scope = node->scope; }
 
 void var_put(char *name, Type *tp) {
-	scope->vars = new_var(scope->vars, name, scope->vars->offset + 8, tp);
+	int add = 8;
+	if (scope == global_scope) {
+		add = 0;
+	}
+	scope->vars = new_var(scope->vars, name, scope->vars->offset + add, tp);
 	if (max_offset < scope->vars->offset) {
 		max_offset = scope->vars->offset;
 	}
@@ -67,8 +72,10 @@ Scope *scope_use(Scope *sc) {
 	return old;
 }
 
+void init_global_scope() { scope = global_scope = new_scope(NULL); }
+
 void init_function_scope() {
-	scope = new_scope(NULL);
+	scope = new_scope(global_scope);
 	max_offset = 0;
 }
 
@@ -78,6 +85,7 @@ void set_function_scope(Node *node) {
 	}
 	node->scope = scope;
 	node->max_offset = max_offset;
+	scope = global_scope;
 }
 
 void set_scope(Node *node) {
