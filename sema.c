@@ -278,6 +278,15 @@ void sema_rec(Node *node) {
 		node->tp = tp;
 		return;
 	}
+	if (node->ty == ND_SIZEOF) {
+		sema_rec(node->lhs);
+		tp = node->lhs->tp;
+		int sz = TypeSize[node->lhs->tp->ty];
+		Node *sznd = new_node_num(sz);
+		sema_rec(sznd);
+		*node = *sznd;
+		return;
+	}
 	if (node->ty == '=') {
 		sema_rec(node->lhs);
 		sema_rec(node->rhs);

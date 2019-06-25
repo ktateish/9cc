@@ -94,6 +94,12 @@ void tokenize(char *p) {
 			continue;
 		}
 
+		if (strncmp(p, "sizeof", 6) == 0 && !is_alnum(p[6])) {
+			push_token(new_token(TK_SIZEOF, p));
+			p += 6;
+			continue;
+		}
+
 		if (strncmp(p, "int", 3) == 0 && !is_alnum(p[3])) {
 			push_token(new_token(TK_INT, p));
 			p += 3;

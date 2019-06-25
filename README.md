@@ -29,7 +29,7 @@ This repositry is my implementation of 9cc based on [his book '低レイヤを�
     * [x] Introduce 'int' keyword instead of implicit type declaration
     * [x] Support pointer type
     * [x] Pointer addition/subtraction
-    * [ ] Support `sizeof` operator
+    * [x] Support `sizeof` operator
     * [ ] Support array type
     * [ ] Index of array
     * [ ] Global variables

@@ -118,6 +118,11 @@ void dump_node(Node *node, int level) {
 		fprintf(stderr, "%*sType: %s\n", level * 2, "",
 			type_name(node->tp));
 		dump_node_rec(node->lhs, level + 1);
+	} else if (node->ty == ND_SIZEOF) {
+		fprintf(stderr, "SIZEOF\n");
+		fprintf(stderr, "%*sType: %s\n", level * 2, "",
+			type_name(node->tp));
+		dump_node_rec(node->lhs, level + 1);
 	} else if (node->ty == ND_IDENT) {
 		fprintf(stderr, "IDENT\n");
 		fprintf(stderr, "%*sName: %s\n", level * 2, "", node->name);

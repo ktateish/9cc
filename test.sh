@@ -146,4 +146,7 @@ try 3 "int *alloc4(); int main() { int *a; a = alloc4(); return *(a+2); }"
 try 4 "int *alloc4(); int main() { int *a; a = alloc4(); return *(a+3); }"
 try 2 "int *alloc4(); int main() { int *a; a = alloc4(); return *(a+3-2); }"
 
+try 4 "int main() { int a; return sizeof(a); }"
+try 8 "int main() { int *a; return sizeof(a); }"
+
 echo OK

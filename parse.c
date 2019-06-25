@@ -288,6 +288,8 @@ Node *unary() {
 		return new_node(ND_DEREF, unary(), NULL);
 	} else if (consume('&')) {
 		return new_node(ND_ENREF, term(), NULL);
+	} else if (consume(TK_SIZEOF)) {
+		return new_node(ND_SIZEOF, unary(), NULL);
 	}
 	return term();
 }
