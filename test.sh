@@ -119,6 +119,8 @@ try 8 "int main() {int a; a = 7; int *b; b = &a; int **c; c = &b; **c = **c + 1;
 try 8 "int f(int *a) { *a = *a + 1; return 0;} int main() {int b; b = 7; f(&b); return b; }"
 try 9 "int f(int *a) { *a = *a + 1; return 0;} int g(int **b) { **b = **b+1; f(*b); return 0; } int main() {int c; c = 7; int *d; d = &c; g(&d); return c; }"
 
+try 3 "int main() { int a; int b; a = 1; { int a; a= 2; b = a; } return a+b; }"
+try 10 "int main() { int a; int b; int c; a = 1; { int a; a = 2; b = a; { int b; int c; b = 100; c = 200; a = b+c; }} { int a; int b; a = 3; b = 4; c = a+b; } return a+b+c; }"
 
 
 echo OK

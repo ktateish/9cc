@@ -7,6 +7,7 @@
 #include "9cc.h"
 
 Scope *scope;
+int max_offset;
 
 Var *new_var(Var *next, char *name, int offset, Type *tp) {
 	Var *var = malloc(sizeof(Var));
@@ -21,6 +22,9 @@ void var_use(Node *node) { scope = node->scope; }
 
 void var_put(char *name, Type *tp) {
 	scope->vars = new_var(scope->vars, name, scope->vars->offset + 8, tp);
+	if (max_offset < scope->vars->offset) {
+		max_offset = scope->vars->offset;
+	}
 }
 
 Var *var_get(char *name) {
@@ -37,6 +41,15 @@ Var *var_get(char *name) {
 	return NULL;
 }
 
+int var_duplicated(char *name) {
+	for (Var *p = scope->vars; p != scope->sentinel; p = p->next) {
+		if (strcmp(p->name, name) == 0) {
+			return 1;
+		}
+	}
+	return 0;
+}
+
 Scope *new_scope(Scope *next) {
 	Scope *s = malloc(sizeof(Scope));
 	s->next = next;
@@ -48,13 +61,40 @@ Scope *new_scope(Scope *next) {
 	return s;
 }
 
-void init_function_scope() { scope = new_scope(NULL); }
+Scope *scope_use(Scope *sc) {
+	Scope *old = scope;
+	scope = sc;
+	return old;
+}
+
+void init_function_scope() {
+	scope = new_scope(NULL);
+	max_offset = 0;
+}
 
 void set_function_scope(Node *node) {
 	if (node->ty != ND_DEFINE_FUNC) {
 		error("Cannot set function scope to non function node");
 	}
 	node->scope = scope;
+	node->max_offset = max_offset;
+}
+
+void set_scope(Node *node) {
+	if (node->ty != ND_BLOCK) {
+		error("invalid node to set scope");
+	}
+	node->scope = scope;
+}
+
+void push_scope() {
+	Scope *ns = new_scope(scope);
+	scope = ns;
+}
+
+void pop_scope() {
+	Scope *prev = scope->next;
+	scope = prev;
 }
 
 Type *result_type_add(Type *lhs, Type *rhs) {
@@ -128,7 +168,7 @@ void sema_rec(Node *node) {
 	Var *v;
 	Type *tp;
 	if (node->ty == ND_DEFINE_INT_VAR) {
-		if (var_get(node->name) != NULL) {
+		if (var_duplicated(node->name)) {
 			error_at(node->input, "duplicate definition");
 		}
 		var_put(node->name, node->tp);
@@ -143,9 +183,12 @@ void sema_rec(Node *node) {
 		return;
 	}
 	if (node->ty == ND_BLOCK) {
+		push_scope();
 		for (int i = 0; i < node->stmts->len; i++) {
 			sema_rec(node->stmts->data[i]);
 		}
+		set_scope(node);
+		pop_scope();
 		return;
 	}
 	if (node->ty == ND_FUNCALL) {

@@ -37,11 +37,10 @@ void gen_define_func(Node *node) {
 	}
 	printf("%s:\n", node->name);
 	var_use(node);
-	Var *v = var_get(NULL);
 	// Prologue
 	printf("  push rbp\n");
 	printf("  mov rbp, rsp\n");
-	printf("  sub rsp, %d\n", v->offset);
+	printf("  sub rsp, %d\n", node->max_offset);
 	for (int i = 0; i < node->params->len; i++) {
 		switch (i) {
 			case 5:
@@ -304,6 +303,7 @@ void gen_binary_operator(Node *node) {
 }
 
 void gen(Node *node) {
+	Scope *saved;
 	switch (node->ty) {
 		case ND_NUM:
 			printf("  push %d\n", node->val);
@@ -315,10 +315,14 @@ void gen(Node *node) {
 			gen_define_int_var(node);
 			break;
 		case ND_BLOCK:
+			saved = scope_use(node->scope);
 			for (int i = 0; i < node->stmts->len; i++) {
 				gen(node->stmts->data[i]);
-				printf("  pop rax\n");
+				if (i + 1 < node->stmts->len) {
+					printf("  pop rax\n");
+				}
 			}
+			scope_use(saved);
 			break;
 		case ND_FUNCALL:
 			gen_funcall(node);

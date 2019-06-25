@@ -98,6 +98,9 @@ typedef struct Scope {
 	Var *sentinel;
 } Scope;
 
+Scope *scope_use(Scope *scope);
+void dump_scope(Scope *scope, int level);
+
 // node types
 enum NodeType {
 	ND_NUM = 256,
@@ -135,7 +138,8 @@ typedef struct Node {
 	Vector *args;   // for ND_FUNCALL
 
 	Vector *params;  // for ND_DEFINE_FUNC
-	Scope *scope;    // for ND_DEFINE_FUNC
+	Scope *scope;    // for ND_DEFINE_FUNC, ND_BLOCK
+	int max_offset;  // for ND_DEFINE_FUNC
 
 	Type *tp;  // for ND_IDENT
 
