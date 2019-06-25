@@ -278,6 +278,8 @@ void gen(Node *node) {
 	Scope *saved;
 	if (node->ty == ND_NUM) {
 		printf("  push %d\n", node->val);
+	} else if (node->ty == ND_DECLARE_FUNC) {
+		;
 	} else if (node->ty == ND_DEFINE_FUNC) {
 		gen_define_func(node);
 	} else if (node->ty == ND_DEFINE_INT_VAR) {

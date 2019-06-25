@@ -84,6 +84,14 @@ Node *new_node(int node_type, Node *lhs, Node *rhs) {
 	return nd;
 }
 
+Node *new_node_declare_func(char *name, Type *tp) {
+	Node *nd = malloc(sizeof(Node));
+	nd->ty = ND_DECLARE_FUNC;
+	nd->name = name;
+	nd->tp = tp;
+	return nd;
+}
+
 Node *new_node_define_func(char *name, Vector *params, Scope *scope,
 			   Node *body) {
 	Node *nd = malloc(sizeof(Node));

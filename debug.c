@@ -59,6 +59,11 @@ void dump_node(Node *node, int level) {
 		fprintf(stderr, "%*sType: %s\n", level * 2, "",
 			type_name(node->tp));
 		dump_node_rec(node->lhs, level + 1);
+	} else if (node->ty == ND_DECLARE_FUNC) {
+		fprintf(stderr, "DECLARE_FUNC\n");
+		fprintf(stderr, "%*sName: %s\n", level * 2, "", node->name);
+		fprintf(stderr, "%*sType: %s\n", level * 2, "",
+			type_name(node->tp));
 	} else if (node->ty == ND_DEFINE_FUNC) {
 		fprintf(stderr, "DEFINE_FUNC\n");
 		fprintf(stderr, "%*sName: %s\n", level * 2, "", node->name);
