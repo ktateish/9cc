@@ -42,30 +42,23 @@ void gen_define_func(Node *node) {
 	printf("  mov rbp, rsp\n");
 	printf("  sub rsp, %d\n", node->max_offset);
 	for (int i = 0; i < node->params->len; i++) {
-		switch (i) {
-			case 5:
-				printf("  mov [rbp-48], r9\n");
-				break;
-			case 4:
-				printf("  mov [rbp-40], r8\n");
-				break;
-			case 3:
-				printf("  mov [rbp-32], rcx\n");
-				break;
-			case 2:
-				printf("  mov [rbp-24], rdx\n");
-				break;
-			case 1:
-				printf("  mov [rbp-16], rsi\n");
-				break;
-			case 0:
-				printf("  mov [rbp-8], rdi\n");
-				break;
-			default:
-				fprintf(stderr,
-					"function parameters more than "
-					"6 is not supported\n");
-				exit(1);
+		if (i == 5)
+			printf("  mov [rbp-48], r9\n");
+		else if (i == 4)
+			printf("  mov [rbp-40], r8\n");
+		else if (i == 3)
+			printf("  mov [rbp-32], rcx\n");
+		else if (i == 2)
+			printf("  mov [rbp-24], rdx\n");
+		else if (i == 1)
+			printf("  mov [rbp-16], rsi\n");
+		else if (i == 0)
+			printf("  mov [rbp-8], rdi\n");
+		else {
+			fprintf(stderr,
+				"function parameters more than "
+				"6 is not supported\n");
+			exit(1);
 		}
 	}
 	gen(node->body);
@@ -111,26 +104,18 @@ void gen_funcall(Node *node) {
 
 	for (int i = n - 1; 0 <= i; i--) {
 		gen(node->args->data[i]);
-		switch (i) {
-			case 5:
-				printf("  pop r9\n");
-				break;
-			case 4:
-				printf("  pop r8\n");
-				break;
-			case 3:
-				printf("  pop rcx\n");
-				break;
-			case 2:
-				printf("  pop rdx\n");
-				break;
-			case 1:
-				printf("  pop rsi\n");
-				break;
-			case 0:
-				printf("  pop rdi\n");
-				break;
-		}
+		if (i == 5)
+			printf("  pop r9\n");
+		else if (i == 4)
+			printf("  pop r8\n");
+		else if (i == 3)
+			printf("  pop rcx\n");
+		else if (i == 2)
+			printf("  pop rdx\n");
+		else if (i == 1)
+			printf("  pop rsi\n");
+		else if (i == 0)
+			printf("  pop rdi\n");
 	}
 
 	printf("  call %s\n", node->name);
@@ -222,23 +207,19 @@ void gen_return(Node *node) {
 }
 
 void gen_ident(Node *node) {
-	switch (node->ty) {
-		case ND_DEREF:
-		case ND_IDENT:
-			gen_lval(node);
-			printf("  pop rax\n");
-			printf("  mov rax, [rax]\n");
-			printf("  push rax\n");
-			break;
-		case ND_ENREF:
-			node = node->lhs;
-			if (node->ty != ND_IDENT) {
-				error("not identifier");
-			}
-			gen_lval(node);
-			break;
-		default:
+	if (node->ty == ND_DEREF || node->ty == ND_IDENT) {
+		gen_lval(node);
+		printf("  pop rax\n");
+		printf("  mov rax, [rax]\n");
+		printf("  push rax\n");
+	} else if (node->ty == ND_ENREF) {
+		node = node->lhs;
+		if (node->ty != ND_IDENT) {
 			error("not identifier");
+		}
+		gen_lval(node);
+	} else {
+		error("not identifier");
 	}
 }
 
@@ -262,92 +243,70 @@ void gen_binary_operator(Node *node) {
 	printf("  pop rdi\n");
 	printf("  pop rax\n");
 
-	switch (node->ty) {
-		case '+':
-			printf("  add rax, rdi\n");
-			break;
-		case '-':
-			printf("  sub rax, rdi\n");
-			break;
-		case '*':
-			printf("  imul rdi\n");
-			break;
-		case '/':
-			printf("  cqo\n");
-			printf("  idiv rdi\n");
-			break;
-		case ND_EQ:
-			printf("  cmp rax, rdi\n");
-			printf("  sete al\n");
-			printf("  movzb rax, al\n");
-			break;
-		case ND_NE:
-			printf("  cmp rax, rdi\n");
-			printf("  setne al\n");
-			printf("  movzb rax, al\n");
-			break;
-		case '<':
-			printf("  cmp rax, rdi\n");
-			printf("  setl al\n");
-			printf("  movzb rax, al\n");
-			break;
-		case ND_LE:
-			printf("  cmp rax, rdi\n");
-			printf("  setle al\n");
-			printf("  movzb rax, al\n");
-			break;
-		default:
-			error("unknown binary operator: %c", node->ty);
+	if (node->ty == '+') {
+		printf("  add rax, rdi\n");
+	} else if (node->ty == '-') {
+		printf("  sub rax, rdi\n");
+	} else if (node->ty == '*') {
+		printf("  imul rdi\n");
+	} else if (node->ty == '/') {
+		printf("  cqo\n");
+		printf("  idiv rdi\n");
+	} else if (node->ty == ND_EQ) {
+		printf("  cmp rax, rdi\n");
+		printf("  sete al\n");
+		printf("  movzb rax, al\n");
+	} else if (node->ty == ND_NE) {
+		printf("  cmp rax, rdi\n");
+		printf("  setne al\n");
+		printf("  movzb rax, al\n");
+	} else if (node->ty == '<') {
+		printf("  cmp rax, rdi\n");
+		printf("  setl al\n");
+		printf("  movzb rax, al\n");
+	} else if (node->ty == ND_LE) {
+		printf("  cmp rax, rdi\n");
+		printf("  setle al\n");
+		printf("  movzb rax, al\n");
+	} else {
+		error("unknown binary operator: %c", node->ty);
 	}
 	printf("  push rax\n");
 }
 
 void gen(Node *node) {
 	Scope *saved;
-	switch (node->ty) {
-		case ND_NUM:
-			printf("  push %d\n", node->val);
-			break;
-		case ND_DEFINE_FUNC:
-			gen_define_func(node);
-			break;
-		case ND_DEFINE_INT_VAR:
-			gen_define_int_var(node);
-			break;
-		case ND_BLOCK:
-			saved = scope_use(node->scope);
-			for (int i = 0; i < node->stmts->len; i++) {
-				gen(node->stmts->data[i]);
-				if (i + 1 < node->stmts->len) {
-					printf("  pop rax\n");
-				}
+	if (node->ty == ND_NUM) {
+		printf("  push %d\n", node->val);
+	} else if (node->ty == ND_DEFINE_FUNC) {
+		gen_define_func(node);
+	} else if (node->ty == ND_DEFINE_INT_VAR) {
+		gen_define_int_var(node);
+	} else if (node->ty == ND_BLOCK) {
+		saved = scope_use(node->scope);
+		for (int i = 0; i < node->stmts->len; i++) {
+			gen(node->stmts->data[i]);
+			if (i + 1 < node->stmts->len) {
+				printf("  pop rax\n");
 			}
-			scope_use(saved);
-			break;
-		case ND_FUNCALL:
-			gen_funcall(node);
-			break;
-		case ND_IF:
-			gen_if(node);
-			break;
-		case ND_WHILE:
-			gen_while(node);
-			break;
-		case ND_FOR:
-			gen_for(node);
-			break;
-		case ND_RETURN:
-			gen_return(node);
-			break;
-		case ND_IDENT:
-		case ND_DEREF:
-		case ND_ENREF:
-			gen_ident(node);
-			break;
-		case '=':
-			gen_assign(node);
-			break;
-		default:
-			gen_binary_operator(node);
+		}
+		scope_use(saved);
+	} else if (node->ty == ND_FUNCALL) {
+		gen_funcall(node);
+	} else if (node->ty == ND_IF) {
+		gen_if(node);
+	} else if (node->ty == ND_WHILE) {
+		gen_while(node);
+	} else if (node->ty == ND_FOR) {
+		gen_for(node);
+	} else if (node->ty == ND_RETURN) {
+		gen_return(node);
+	} else if (node->ty == ND_IDENT || node->ty == ND_DEREF ||
+		   node->ty == ND_ENREF) {
+		gen_ident(node);
+	} else if (node->ty == '=') {
+		gen_assign(node);
+	} else {
+		gen_binary_operator(node);
 	}
 }
