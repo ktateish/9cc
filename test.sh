@@ -12,12 +12,28 @@ try() {
 	input="$2"
 
 	cat <<EOM > external.c
+#include <stdlib.h>
+
 int ex1() { return 5; }
 
 int ex2(int a) { return a * 2; }
 
 int ex3(int a1, int a2, int a3, int a4, int a5, int a6) {
 	return a1 + a2 + a3 + a4 + a5 + a6;
+}
+
+int *alloc1() {
+        int *p = malloc(sizeof(int));
+        *p = 32;
+}
+
+int *alloc4() {
+         int *p = malloc(sizeof(int)*4);
+         p[0] = 1;
+         p[1] = 2;
+         p[2] = 3;
+         p[3] = 4;
+         return p;
 }
 EOM
 
@@ -122,5 +138,12 @@ try 9 "int f(int *a) { *a = *a + 1; return 0;} int g(int **b) { **b = **b+1; f(*
 try 3 "int main() { int a; int b; a = 1; { int a; a= 2; b = a; } return a+b; }"
 try 10 "int main() { int a; int b; int c; a = 1; { int a; a = 2; b = a; { int b; int c; b = 100; c = 200; a = b+c; }} { int a; int b; a = 3; b = 4; c = a+b; } return a+b+c; }"
 
+try 32 "int *alloc1(); int main() { int *a; a = alloc1(); return *a; }"
+try 1 "int *alloc4(); int main() { int *a; a = alloc4(); return *a; }"
+try 1 "int *alloc4(); int main() { int *a; a = alloc4(); return *(a+0); }"
+try 2 "int *alloc4(); int main() { int *a; a = alloc4(); return *(a+1); }"
+try 3 "int *alloc4(); int main() { int *a; a = alloc4(); return *(a+2); }"
+try 4 "int *alloc4(); int main() { int *a; a = alloc4(); return *(a+3); }"
+try 2 "int *alloc4(); int main() { int *a; a = alloc4(); return *(a+3-2); }"
 
 echo OK

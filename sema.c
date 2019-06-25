@@ -6,6 +6,13 @@
 
 #include "9cc.h"
 
+int TypeSize[] = {
+    0,  // TP_UNDETERMINED,
+    4,  // TP_INT,
+    8,  // TP_POINTER,
+    8,  // TP_FUNCTION,
+};
+
 Scope *global_scope;
 Scope *scope;
 int max_offset;
@@ -287,14 +294,34 @@ void sema_rec(Node *node) {
 		node->tp = new_type_int();
 		return;
 	}
-	sema_rec(node->lhs);
-	sema_rec(node->rhs);
-	tp = result_type(node->ty, node->lhs->tp, node->rhs->tp);
-	if (tp == NULL) {
-		error("type unmatch: lhs: %s, rhs: %s",
-		      type_name(node->lhs->tp), type_name(node->rhs->tp));
+	{
+		Node *lhs = node->lhs;
+		Node *rhs = node->rhs;
+		sema_rec(lhs);
+		sema_rec(rhs);
+
+		if (lhs->tp->ty == TP_POINTER && rhs->tp->ty == TP_INT) {
+			int sz = TypeSize[lhs->tp->ptr_to->ty];
+			rhs = new_node('*', new_node_num(sz), rhs);
+			rhs->tp = new_type_int();
+			rhs->lhs->tp = new_type_int();
+			node->rhs = rhs;
+		}
+		if (lhs->tp->ty == TP_INT && rhs->tp->ty == TP_POINTER) {
+			int sz = TypeSize[rhs->tp->ptr_to->ty];
+			lhs = new_node('*', new_node_num(sz), lhs);
+			lhs->tp = new_type_int();
+			lhs->lhs->tp = new_type_int();
+			node->lhs = lhs;
+		}
+
+		tp = result_type(node->ty, lhs->tp, rhs->tp);
+		if (tp == NULL) {
+			error("type unmatch: lhs: %s, rhs: %s",
+			      type_name(lhs->tp), type_name(rhs->tp));
+		}
+		node->tp = tp;
 	}
-	node->tp = tp;
 }
 
 void sema_toplevel(Node *node) {

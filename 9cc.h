@@ -152,6 +152,8 @@ typedef struct Node {
 	char *input;  // for ND_DEFINE_INT_VAR, ND_IDENT
 } Node;
 
+Node *new_node(int node_type, Node *lhs, Node *rhs);
+Node *new_node_num(int val);
 void dump_nodes();
 Node *code(int i);
 void program();
