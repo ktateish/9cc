@@ -33,6 +33,9 @@ void var_put(char *name, Type *tp) {
 	if (scope == global_scope) {
 		add = 0;
 	}
+	if (tp->ty == TP_ARRAY) {
+		add = 8 * tp->array_size;
+	}
 	scope->vars = new_var(scope->vars, name, scope->vars->offset + add, tp);
 	if (max_offset < scope->vars->offset) {
 		max_offset = scope->vars->offset;
