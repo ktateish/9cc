@@ -36,6 +36,14 @@ Type *new_type_function(Vector *params, Type *returning) {
 	return tp;
 }
 
+Type *new_type_array(Type *ptr_to, int array_size) {
+	Type *tp = malloc(sizeof(Type));
+	tp->ty = TP_ARRAY;
+	tp->ptr_to = ptr_to;
+	tp->array_size = array_size;
+	return tp;
+}
+
 Type *new_type_undetermined() {
 	Type *tp = malloc(sizeof(TP_UNDETERMINED));
 	tp->ty = TP_UNDETERMINED;

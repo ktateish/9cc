@@ -72,6 +72,7 @@ enum TypeType {
 	TP_INT,
 	TP_POINTER,
 	TP_FUNCTION,
+	TP_ARRAY,
 };
 
 typedef struct Type {
@@ -79,6 +80,7 @@ typedef struct Type {
 	struct Type *ptr_to;
 	Vector *params;
 	struct Type *returning;
+	int array_size;
 } Type;
 
 Type *new_type_int();
