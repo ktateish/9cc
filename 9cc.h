@@ -70,11 +70,14 @@ enum TypeType {
 	TP_UNDETERMINED,
 	TP_INT,
 	TP_POINTER,
+	TP_FUNCTION,
 };
 
 typedef struct Type {
 	enum TypeType ty;
 	struct Type *ptr_to;
+	Vector *params;
+	struct Type *returning;
 } Type;
 
 Type *new_type_int();

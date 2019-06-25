@@ -28,6 +28,14 @@ Type *new_type_ptr(Type *ptr_to) {
 	return tp;
 }
 
+Type *new_type_function(Vector *params, Type *returning) {
+	Type *tp = malloc(sizeof(Type));
+	tp->ty = TP_FUNCTION;
+	tp->params = params;
+	tp->returning = returning;
+	return tp;
+}
+
 Type *new_type_undetermined() {
 	Type *tp = malloc(sizeof(TP_UNDETERMINED));
 	tp->ty = TP_UNDETERMINED;
@@ -41,6 +49,25 @@ char *type_name(Type *tp) {
 		char *src = type_name(tp->ptr_to);
 		char *s = malloc(strlen(src) + 2);
 		sprintf(s, "*%s", src);
+		return s;
+	}
+	if (tp->ty == TP_FUNCTION) {
+		char *returning = type_name(tp->returning);
+
+		Vector *params = new_vector();
+		for (int i = 0; i < tp->params->len; i++) {
+			Type *p = tp->params->data[i];
+			char *s = type_name(p);
+			vec_push(params, s);
+		}
+		char *param_str = "";
+		if (0 < tp->params->len) {
+			param_str = string_join(params, ", ");
+		}
+
+		char *s = malloc(strlen("func() ") + strlen(param_str) +
+				 strlen(returning) + 1);
+		sprintf(s, "func(%s) %s", param_str, returning);
 		return s;
 	}
 	if (tp->ty == TP_UNDETERMINED) return "undetermined";
