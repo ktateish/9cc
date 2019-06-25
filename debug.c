@@ -85,6 +85,12 @@ void dump_node(Node *node, int level) {
 	} else if (node->ty == ND_FUNCALL) {
 		fprintf(stderr, "FUNCALL\n");
 		fprintf(stderr, "%*sName: %s\n", level * 2, "", node->name);
+		fprintf(stderr, "%*sType: %s\n", level * 2, "",
+			type_name(node->tp));
+		fprintf(stderr, "%*sArgs:\n", level * 2, "");
+		for (int i = 0; i < node->args->len; i++) {
+			dump_node_rec(node->args->data[i], level + 1);
+		}
 	} else if (node->ty == ND_IF) {
 		fprintf(stderr, "WHILE\n");
 		dump_node_rec(node->cond, level + 1);
