@@ -200,10 +200,28 @@ void sema_rec(Node *node) {
 		return;
 	}
 	if (node->ty == ND_FUNCALL) {
+		Var *v = var_get(node->name);
+		if (v == NULL) {
+			error("undefined function: %s", node->name);
+		}
+		Type *tp = v->tp;
+		if (tp->ty != TP_FUNCTION) {
+			error("cannot call non-function type: %s", node->name);
+		}
 		for (int i = 0; i < node->args->len; i++) {
 			sema_rec(node->args->data[i]);
+			Type *lhs = tp->params->data[i];
+			Node *nd = node->args->data[i];
+			Type *rhs = nd->tp;
+			if (!assignable(lhs, rhs)) {
+				error(
+				    "%s requires %s type for %d-th parameter "
+				    "but %s type is given",
+				    node->name, type_name(lhs), i + 1,
+				    type_name(rhs));
+			}
 		}
-		node->tp = new_type_int();
+		node->tp = tp->returning;
 		return;
 	}
 	if (node->ty == ND_IF) {
@@ -280,7 +298,17 @@ void sema_rec(Node *node) {
 }
 
 void sema_toplevel(Node *node) {
-	if (node->ty == ND_DEFINE_FUNC) {
+	if (node->ty == ND_DECLARE_FUNC) {
+		if (var_duplicated(node->name)) {
+			error("duplicate definition: %s", node->name);
+		}
+		var_put(node->name, node->tp);
+	} else if (node->ty == ND_DEFINE_FUNC) {
+		Var *declared = var_get(node->name);
+		if (declared != NULL) {
+			// XXX: check type
+		}
+		var_put(node->name, node->tp);
 		init_function_scope();
 		for (int i = 0; i < node->params->len; i++) {
 			sema_rec(node->params->data[i]);

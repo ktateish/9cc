@@ -101,11 +101,11 @@ try 5 "int main() { { return 5; } }"
 try 5 "int main() { for (;;) { return 5; } }"
 try 5 "int main() { int foo; int i; foo = 0; i = 0; while (i < 5) { foo = foo+1; i = i+1; } return foo; }"
 
-try 8 "int main() { int bar; bar = 3; return ex1() + bar; }"
+try 8 "int ex1(); int main() { int bar; bar = 3; return ex1() + bar; }"
 
-try 9 "int main() { int a; a = 2; return ex2(a) + 5; }"
-try 28 "int main() { return ex3(1, 2, 3, 4, 5, 6) + 7; }"
-try 28 "int main() { int a; a = ex3(1, 2, 3, 4, 5, 6) + 7; return a; }"
+try 9 "int ex2(int a); int main() { int a; a = 2; return ex2(a) + 5; }"
+try 28 "int ex3(int a1, int a2, int a3, int a4, int a5, int a6); int main() { return ex3(1, 2, 3, 4, 5, 6) + 7; }"
+try 28 "int ex3(int a1, int a2, int a3, int a4, int a5, int a6); int main() { int a; a = ex3(1, 2, 3, 4, 5, 6) + 7; return a; }"
 
 try 4 "int f() { return 2; } int main() { return 2 * f(); }"
 

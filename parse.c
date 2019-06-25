@@ -92,7 +92,7 @@ Node *new_node_declare_func(char *name, Type *tp) {
 	return nd;
 }
 
-Node *new_node_define_func(char *name, Vector *params, Scope *scope,
+Node *new_node_define_func(char *name, Type *tp, Vector *params, Scope *scope,
 			   Node *body) {
 	Node *nd = malloc(sizeof(Node));
 	nd->ty = ND_DEFINE_FUNC;
@@ -100,7 +100,7 @@ Node *new_node_define_func(char *name, Vector *params, Scope *scope,
 	nd->scope = scope;
 	nd->params = params;
 	nd->body = body;
-	nd->tp = new_type_undetermined();
+	nd->tp = tp;
 	return nd;
 }
 
@@ -535,6 +535,12 @@ Node *define_func() {
 		error_at(tokens(pos)->input, "not 'int'");
 	}
 
+	Type *returning = new_type_int();
+
+	while (consume('*')) {
+		returning = new_type_ptr(returning);
+	}
+
 	if (tokens(pos)->ty != TK_IDENT) {
 		error_at(tokens(pos)->input, "not an identifier");
 	}
@@ -542,6 +548,18 @@ Node *define_func() {
 	char *name = tokens(pos++)->name;
 
 	Vector *params = define_func_params();
+
+	Vector *param_types = new_vector();
+	for (int i = 0; i < params->len; i++) {
+		Node *nd = params->data[i];
+		vec_push(param_types, nd->tp);
+	}
+
+	Type *tp = new_type_function(param_types, returning);
+
+	if (consume(';')) {
+		return new_node_declare_func(name, tp);
+	}
 
 	if (!consume('{')) {
 		error_at(tokens(pos)->input, "not '{'");
@@ -552,7 +570,7 @@ Node *define_func() {
 	}
 
 	Node *node =
-	    new_node_define_func(name, params, NULL, new_node_block(body));
+	    new_node_define_func(name, tp, params, NULL, new_node_block(body));
 	return node;
 }
 
