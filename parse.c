@@ -51,7 +51,7 @@ Type *new_type_undetermined() {
 }
 
 char *type_name(Type *tp) {
-	if (tp == NULL) return "unknown";
+	if (tp == NULL) return "(null)";
 	if (tp->ty == TP_INT) return "int";
 	if (tp->ty == TP_POINTER) {
 		char *src = type_name(tp->ptr_to);
@@ -86,7 +86,7 @@ char *type_name(Type *tp) {
 		return s;
 	}
 	if (tp->ty == TP_UNDETERMINED) return "undetermined";
-	return "unknown";
+	return "UNKNOWN (i.e. not implemented)";
 }
 
 // node types
