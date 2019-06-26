@@ -33,7 +33,7 @@ void var_put(char *name, Type *tp) {
 	if (scope == global_scope) {
 		add = 0;
 	}
-	if (tp->ty == TP_ARRAY) {
+	if (tp->kind == TP_ARRAY) {
 		add = 8 * tp->array_size;
 	}
 	scope->vars = new_var(scope->vars, name, scope->vars->offset + add, tp);
@@ -116,36 +116,36 @@ void pop_scope() {
 }
 
 Type *result_type_add(Type *lhs, Type *rhs) {
-	if (lhs->ty == TP_INT && rhs->ty == TP_INT) return lhs;
-	if (lhs->ty == TP_POINTER && rhs->ty == TP_INT) return lhs;
-	if (lhs->ty == TP_INT && rhs->ty == TP_POINTER) return rhs;
-	if (lhs->ty == TP_POINTER && rhs->ty == TP_POINTER) return NULL;
+	if (lhs->kind == TP_INT && rhs->kind == TP_INT) return lhs;
+	if (lhs->kind == TP_POINTER && rhs->kind == TP_INT) return lhs;
+	if (lhs->kind == TP_INT && rhs->kind == TP_POINTER) return rhs;
+	if (lhs->kind == TP_POINTER && rhs->kind == TP_POINTER) return NULL;
 	return NULL;
 }
 
 Type *result_type_sub(Type *lhs, Type *rhs) {
-	if (lhs->ty == TP_INT && rhs->ty == TP_INT) return lhs;
-	if (lhs->ty == TP_POINTER && rhs->ty == TP_INT) return lhs;
-	if (lhs->ty == TP_INT && rhs->ty == TP_POINTER) return rhs;
-	if (lhs->ty == TP_POINTER && rhs->ty == TP_POINTER) return rhs;
+	if (lhs->kind == TP_INT && rhs->kind == TP_INT) return lhs;
+	if (lhs->kind == TP_POINTER && rhs->kind == TP_INT) return lhs;
+	if (lhs->kind == TP_INT && rhs->kind == TP_POINTER) return rhs;
+	if (lhs->kind == TP_POINTER && rhs->kind == TP_POINTER) return rhs;
 	return NULL;
 }
 
 Type *result_type_mul(Type *lhs, Type *rhs) {
-	if (lhs->ty == TP_INT && rhs->ty == TP_INT) return lhs;
+	if (lhs->kind == TP_INT && rhs->kind == TP_INT) return lhs;
 	return NULL;
 }
 
 Type *result_type_div(Type *lhs, Type *rhs) {
-	if (lhs->ty == TP_INT && rhs->ty == TP_INT) return lhs;
+	if (lhs->kind == TP_INT && rhs->kind == TP_INT) return lhs;
 	return NULL;
 }
 
 int assignable(Type *lhs, Type *rhs) {
-	if (lhs->ty == TP_POINTER && rhs->ty == TP_POINTER) {
+	if (lhs->kind == TP_POINTER && rhs->kind == TP_POINTER) {
 		return assignable(lhs->ptr_to, rhs->ptr_to);
 	}
-	return lhs->ty == rhs->ty;
+	return lhs->kind == rhs->kind;
 }
 
 Type *result_type_assign(Type *lhs, Type *rhs) {
@@ -154,14 +154,14 @@ Type *result_type_assign(Type *lhs, Type *rhs) {
 }
 
 Type *result_type_eq(Type *lhs, Type *rhs) {
-	if (lhs->ty == TP_INT && rhs->ty == TP_INT) return lhs;
+	if (lhs->kind == TP_INT && rhs->kind == TP_INT) return lhs;
 	return NULL;
 }
 
 Type *result_type_enref(Type *tp) { return new_type_ptr(tp); }
 
 Type *result_type_deref(Type *tp) {
-	if (tp->ty != TP_POINTER) {
+	if (tp->kind != TP_POINTER) {
 		return NULL;
 	}
 	return tp->ptr_to;
@@ -201,7 +201,7 @@ void sema_rec(Node *node) {
 	}
 	if (node->kind == ND_IDENT) {
 		sema_ident(node);
-		if (node->tp->ty == TP_ARRAY) {
+		if (node->tp->kind == TP_ARRAY) {
 			Type *tp = result_type_enref(node->tp->ptr_to);
 			Node *nn = new_node(ND_ENREF, node_dup(node), NULL);
 			*node = *nn;
@@ -224,7 +224,7 @@ void sema_rec(Node *node) {
 			error("undefined function: %s", node->name);
 		}
 		Type *tp = v->tp;
-		if (tp->ty != TP_FUNCTION) {
+		if (tp->kind != TP_FUNCTION) {
 			error("cannot call non-function type: %s", node->name);
 		}
 		for (int i = 0; i < node->args->len; i++) {
@@ -285,7 +285,7 @@ void sema_rec(Node *node) {
 		tp = node->lhs->tp;
 		// XXX: check whether match the returning type of the
 		// function
-		if (tp == NULL || tp->ty == TP_UNDETERMINED) {
+		if (tp == NULL || tp->kind == TP_UNDETERMINED) {
 			error("cannot return undetermined type");
 		}
 		node->tp = tp;
@@ -297,9 +297,9 @@ void sema_rec(Node *node) {
 		} else {
 			sema_rec(node->lhs);
 		}
-		int sz = TypeSize[node->lhs->tp->ty];
-		if (node->lhs->tp->ty == TP_ARRAY) {
-			sz = TypeSize[node->lhs->tp->ptr_to->ty] *
+		int sz = TypeSize[node->lhs->tp->kind];
+		if (node->lhs->tp->kind == TP_ARRAY) {
+			sz = TypeSize[node->lhs->tp->ptr_to->kind] *
 			     node->lhs->tp->array_size;
 		}
 		Node *sznd = new_node_num(sz);
@@ -329,15 +329,15 @@ void sema_rec(Node *node) {
 		sema_rec(lhs);
 		sema_rec(rhs);
 
-		if (lhs->tp->ty == TP_POINTER && rhs->tp->ty == TP_INT) {
-			int sz = TypeSize[lhs->tp->ptr_to->ty];
+		if (lhs->tp->kind == TP_POINTER && rhs->tp->kind == TP_INT) {
+			int sz = TypeSize[lhs->tp->ptr_to->kind];
 			rhs = new_node('*', new_node_num(sz), rhs);
 			rhs->tp = new_type_int();
 			rhs->lhs->tp = new_type_int();
 			node->rhs = rhs;
 		}
-		if (lhs->tp->ty == TP_INT && rhs->tp->ty == TP_POINTER) {
-			int sz = TypeSize[rhs->tp->ptr_to->ty];
+		if (lhs->tp->kind == TP_INT && rhs->tp->kind == TP_POINTER) {
+			int sz = TypeSize[rhs->tp->ptr_to->kind];
 			lhs = new_node('*', new_node_num(sz), lhs);
 			lhs->tp = new_type_int();
 			lhs->lhs->tp = new_type_int();

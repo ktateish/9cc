@@ -67,7 +67,7 @@ void tokenize(char *p);
 extern int pos;
 
 // types
-enum TypeType {
+enum TypeKind {
 	TP_UNDETERMINED,
 	TP_INT,
 	TP_POINTER,
@@ -76,7 +76,7 @@ enum TypeType {
 };
 
 typedef struct Type {
-	enum TypeType ty;
+	enum TypeKind kind;
 	struct Type *ptr_to;
 	Vector *params;
 	struct Type *returning;
