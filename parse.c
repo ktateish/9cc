@@ -206,8 +206,8 @@ void push_code(Node *t) { vec_push(code_vec, t); }
 
 Node *code(int i) { return code_vec->data[i]; }
 
-int consume(int ty) {
-	if (tokens(pos)->ty != ty) {
+int consume(int kind) {
+	if (tokens(pos)->kind != kind) {
 		return 0;
 	}
 	pos++;
@@ -242,7 +242,7 @@ int consume(int ty) {
 Node *expr();
 
 Node *identifier() {
-	if (tokens(pos)->ty != TK_IDENT) {
+	if (tokens(pos)->kind != TK_IDENT) {
 		error_at(tokens(pos)->input, "invalid token");
 	}
 	Token *tk = tokens(pos++);
@@ -280,11 +280,11 @@ Node *term() {
 		return node;
 	}
 
-	if (tokens(pos)->ty == TK_NUM) {
+	if (tokens(pos)->kind == TK_NUM) {
 		return new_node_num(tokens(pos++)->val);
 	}
 
-	if (tokens(pos)->ty == TK_IDENT) {
+	if (tokens(pos)->kind == TK_IDENT) {
 		return identifier();
 	}
 
@@ -473,14 +473,14 @@ Node *stmt_define_int_var() {
 		tp = new_type_ptr(tp);
 	}
 
-	if (tokens(pos)->ty != TK_IDENT) {
+	if (tokens(pos)->kind != TK_IDENT) {
 		error_at(tokens(pos)->input, "not an identifier");
 	}
 	Token *tk = tokens(pos++);
 
 	if (consume('[')) {
 		int array_size;
-		if (tokens(pos)->ty != TK_NUM) {
+		if (tokens(pos)->kind != TK_NUM) {
 			error_at(tokens(pos)->input, "not a number");
 		}
 		array_size = tokens(pos++)->val;
@@ -533,7 +533,7 @@ Vector *define_func_params() {
 		tp = new_type_ptr(tp);
 	}
 
-	if (tokens(pos)->ty != TK_IDENT) {
+	if (tokens(pos)->kind != TK_IDENT) {
 		error_at(tokens(pos)->input, "not an identifier");
 	}
 
@@ -555,7 +555,7 @@ Vector *define_func_params() {
 			tp = new_type_ptr(tp);
 		}
 
-		if (tokens(pos)->ty != TK_IDENT) {
+		if (tokens(pos)->kind != TK_IDENT) {
 			error_at(tokens(pos)->input, "not an identifier");
 		}
 		tk = tokens(pos++);
@@ -576,7 +576,7 @@ Node *define_func() {
 		returning = new_type_ptr(returning);
 	}
 
-	if (tokens(pos)->ty != TK_IDENT) {
+	if (tokens(pos)->kind != TK_IDENT) {
 		error_at(tokens(pos)->input, "not an identifier");
 	}
 
@@ -613,7 +613,7 @@ Node *definition() { return define_func(); }
 
 void program() {
 	init_code();
-	while (tokens(pos)->ty != TK_EOF) {
+	while (tokens(pos)->kind != TK_EOF) {
 		push_code(definition());
 	}
 	push_code(NULL);

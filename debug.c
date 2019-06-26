@@ -6,36 +6,36 @@
 void dump_token(Token *t) {
 	fprintf(stderr, "--\n");
 	fprintf(stderr, "Token: ");
-	if (t->ty == TK_IF)
+	if (t->kind == TK_IF)
 		fprintf(stderr, "'if'\n");
-	else if (t->ty == TK_ELSE)
+	else if (t->kind == TK_ELSE)
 		fprintf(stderr, "'else'\n");
-	else if (t->ty == TK_WHILE)
+	else if (t->kind == TK_WHILE)
 		fprintf(stderr, "'for'\n");
-	else if (t->ty == TK_FOR)
+	else if (t->kind == TK_FOR)
 		fprintf(stderr, "'for'\n");
-	else if (t->ty == TK_RETURN)
+	else if (t->kind == TK_RETURN)
 		fprintf(stderr, "'return'\n");
-	else if (t->ty == TK_IDENT) {
+	else if (t->kind == TK_IDENT) {
 		fprintf(stderr, "IDENTIFIER\n");
 		fprintf(stderr, "Name: %s\n", t->name);
-	} else if (t->ty == TK_EQ)
+	} else if (t->kind == TK_EQ)
 		fprintf(stderr, "'=='\n");
-	else if (t->ty == TK_NE)
+	else if (t->kind == TK_NE)
 		fprintf(stderr, "'!='\n");
-	else if (t->ty == TK_LE)
+	else if (t->kind == TK_LE)
 		fprintf(stderr, "'<='\n");
-	else if (t->ty == TK_GE)
+	else if (t->kind == TK_GE)
 		fprintf(stderr, "'>='\n");
-	else if (t->ty == TK_EOF)
+	else if (t->kind == TK_EOF)
 		fprintf(stderr, "EOF\n");
-	else if (t->ty == TK_NUM) {
+	else if (t->kind == TK_NUM) {
 		fprintf(stderr, "NUMBER\n");
 		fprintf(stderr, "Value: %d\n", t->val);
-	} else if (t->ty == TK_INT)
+	} else if (t->kind == TK_INT)
 		fprintf(stderr, "INT\n");
 	else
-		fprintf(stderr, "%c\n", t->ty);
+		fprintf(stderr, "%c\n", t->kind);
 }
 
 void dump_tokens() {

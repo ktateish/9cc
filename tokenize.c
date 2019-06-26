@@ -9,16 +9,16 @@
 #include "9cc.h"
 
 // token
-Token *new_token(int ty, char *input) {
+Token *new_token(int kind, char *input) {
 	Token *t = malloc(sizeof(Token));
-	t->ty = ty;
+	t->kind = kind;
 	t->input = input;
 	return t;
 }
 
 Token *new_token_num(int val, char *input) {
 	Token *t = malloc(sizeof(Token));
-	t->ty = TK_NUM;
+	t->kind = TK_NUM;
 	t->val = val;
 	t->input = input;
 	return t;
@@ -26,7 +26,7 @@ Token *new_token_num(int val, char *input) {
 
 Token *new_token_ident(char *input, int len) {
 	Token *t = malloc(sizeof(Token));
-	t->ty = TK_IDENT;
+	t->kind = TK_IDENT;
 	t->name = strndup(input, len);
 	t->input = input;
 	return t;

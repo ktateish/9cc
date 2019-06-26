@@ -21,7 +21,7 @@ char *string_join(Vector *strings, char *sep);
 extern char *user_input;
 
 // token types
-enum TokenType {
+enum TokenKind {
 	TK_NUM = 256,  // integer
 	TK_IF,
 	TK_ELSE,
@@ -40,7 +40,7 @@ enum TokenType {
 
 // token
 typedef struct {
-	int ty;
+	enum TokenKind kind;
 	int val;
 	char *name;
 	char *input;
