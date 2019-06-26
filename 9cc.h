@@ -158,6 +158,7 @@ typedef struct Node {
 
 Node *new_node(int node_type, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
+Node *node_dup(Node *node);
 void dump_nodes();
 Node *code(int i);
 void program();

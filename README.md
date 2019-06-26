@@ -30,7 +30,7 @@ This repositry is my implementation of 9cc based on [his book '低レイヤを�
     * [x] Support pointer type
     * [x] Pointer addition/subtraction
     * [x] Support `sizeof` operator
-    * [ ] Support array type
+    * [x] Support array type
     * [ ] Index of array
     * [ ] Global variables
     * [ ] Support `char *` type

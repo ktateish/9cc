@@ -192,6 +192,12 @@ Node *new_node_ident(char *name, char *input) {
 	return nd;
 }
 
+Node *node_dup(Node *node) {
+	Node *nn = malloc(sizeof(Node));
+	*nn = *node;
+	return nn;
+}
+
 Vector *code_vec;
 
 void init_code() { code_vec = new_vector(); }

@@ -180,10 +180,17 @@ Type *result_type(int op, Type *lhs, Type *rhs) {
 	return NULL;
 }
 
+void sema_ident(Node *node) {
+	Var *v = var_get(node->name);
+	if (v == NULL) {
+		error_at(node->input, "unknown variable");
+	}
+	node->tp = v->tp;
+}
+
 void sema_rec(Node *node) {
 	if (node == NULL) return;
 
-	Var *v;
 	Type *tp;
 	if (node->ty == ND_DEFINE_INT_VAR) {
 		if (var_duplicated(node->name)) {
@@ -193,11 +200,13 @@ void sema_rec(Node *node) {
 		return;
 	}
 	if (node->ty == ND_IDENT) {
-		v = var_get(node->name);
-		if (v == NULL) {
-			error_at(node->input, "unknown variable");
+		sema_ident(node);
+		if (node->tp->ty == TP_ARRAY) {
+			Type *tp = result_type_enref(node->tp->ptr_to);
+			Node *nn = new_node(ND_ENREF, node_dup(node), NULL);
+			*node = *nn;
+			node->tp = tp;
 		}
-		node->tp = v->tp;
 		return;
 	}
 	if (node->ty == ND_BLOCK) {
