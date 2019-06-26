@@ -291,9 +291,16 @@ void sema_rec(Node *node) {
 		return;
 	}
 	if (node->ty == ND_SIZEOF) {
-		sema_rec(node->lhs);
-		tp = node->lhs->tp;
+		if (node->lhs->ty == ND_IDENT) {
+			sema_ident(node->lhs);
+		} else {
+			sema_rec(node->lhs);
+		}
 		int sz = TypeSize[node->lhs->tp->ty];
+		if (node->lhs->tp->ty == TP_ARRAY) {
+			sz = TypeSize[node->lhs->tp->ptr_to->ty] *
+			     node->lhs->tp->array_size;
+		}
 		Node *sznd = new_node_num(sz);
 		sema_rec(sznd);
 		*node = *sznd;
