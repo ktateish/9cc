@@ -212,7 +212,7 @@ int consume(int ty) {
 //		| "while" "(" expr ")" stmt
 //		| "for" "(" expr? ";" expr? ";" expr? ";" ")" stmt
 //		| "return" expr ";"
-//		| "int" "*"* identifier ";"
+//		| "int" "*"* identifier ("[" num "]")?";"
 //   expr       = assign
 //   assign       = equality (= equality)?
 //   equality   = relational ("==" relational | "!=" relational)*
@@ -464,6 +464,18 @@ Node *stmt_define_int_var() {
 		error_at(tokens(pos)->input, "not an identifier");
 	}
 	Token *tk = tokens(pos++);
+
+	if (consume('[')) {
+		int array_size;
+		if (tokens(pos)->ty != TK_NUM) {
+			error_at(tokens(pos)->input, "not a number");
+		}
+		array_size = tokens(pos++)->val;
+		tp = new_type_array(tp, array_size);
+		if (!consume(']')) {
+			error_at(tokens(pos)->input, "not ']'");
+		}
+	}
 	char *name = tk->name;
 	char *input = tk->input;
 	// variables
