@@ -78,6 +78,13 @@ char *type_name(Type *tp) {
 		sprintf(s, "func(%s) %s", param_str, returning);
 		return s;
 	}
+	if (tp->ty == TP_ARRAY) {
+		char *src = type_name(tp->ptr_to);
+		char *s =
+		    malloc(strlen(src) + 30);  // sufficient for array_size
+		sprintf(s, "[%d]%s", tp->array_size, src);
+		return s;
+	}
 	if (tp->ty == TP_UNDETERMINED) return "undetermined";
 	return "unknown";
 }
