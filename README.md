@@ -5,6 +5,8 @@ This repositry is my implementation of 9cc based on [his book '低レイヤを�
 
 ## TODO
 
+### Feature
+
 * [x] Calculator-like language
     * [x] Compile a single integer
     * [x] Addition and Subtraction
@@ -40,6 +42,11 @@ This repositry is my implementation of 9cc based on [his book '低レイヤを�
     * [ ] Rewrite tests in C
 * [ ] Executable image and initialization expression
 * [ ] Syntax of types in C
+
+### Refactoring
+
+* [ ] propagate 'input' to all node types
+* [ ] Rename type to kind
 
 [1]: https://github.com/rui314/9cc
 [2]: https://www.sigbus.info/compilerbook
