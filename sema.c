@@ -17,12 +17,12 @@ Scope *global_scope;
 Scope *scope;
 int max_offset;
 
-Var *new_var(Var *next, char *name, int offset, Type *tp) {
+Var *new_var(Var *next, char *name, int offset, Type *type) {
 	Var *var = malloc(sizeof(Var));
 	var->next = next;
 	var->name = name;
 	var->offset = offset;
-	var->tp = tp;
+	var->type = type;
 	return var;
 }
 
@@ -185,7 +185,7 @@ void sema_ident(Node *node) {
 	if (v == NULL) {
 		error_at(node->input, "unknown variable");
 	}
-	node->tp = v->tp;
+	node->type = v->type;
 }
 
 void sema_rec(Node *node) {
@@ -196,16 +196,16 @@ void sema_rec(Node *node) {
 		if (var_duplicated(node->name)) {
 			error_at(node->input, "duplicate definition");
 		}
-		var_put(node->name, node->tp);
+		var_put(node->name, node->type);
 		return;
 	}
 	if (node->kind == ND_IDENT) {
 		sema_ident(node);
-		if (node->tp->kind == TP_ARRAY) {
-			Type *tp = result_type_enref(node->tp->ptr_to);
+		if (node->type->kind == TP_ARRAY) {
+			Type *tp = result_type_enref(node->type->ptr_to);
 			Node *nn = new_node(ND_ENREF, node_dup(node), NULL);
 			*node = *nn;
-			node->tp = tp;
+			node->type = tp;
 		}
 		return;
 	}
@@ -223,7 +223,7 @@ void sema_rec(Node *node) {
 		if (v == NULL) {
 			error("undefined function: %s", node->name);
 		}
-		Type *tp = v->tp;
+		Type *tp = v->type;
 		if (tp->kind != TP_FUNCTION) {
 			error("cannot call non-function type: %s", node->name);
 		}
@@ -231,7 +231,7 @@ void sema_rec(Node *node) {
 			sema_rec(node->args->data[i]);
 			Type *lhs = tp->params->data[i];
 			Node *nd = node->args->data[i];
-			Type *rhs = nd->tp;
+			Type *rhs = nd->type;
 			if (!assignable(lhs, rhs)) {
 				error(
 				    "%s requires %s type for %d-th parameter "
@@ -240,7 +240,7 @@ void sema_rec(Node *node) {
 				    type_name(rhs));
 			}
 		}
-		node->tp = tp->returning;
+		node->type = tp->returning;
 		return;
 	}
 	if (node->kind == ND_IF) {
@@ -267,28 +267,28 @@ void sema_rec(Node *node) {
 		if (node->lhs->kind != ND_IDENT) {
 			error("cannot get address of non-identifier");
 		}
-		tp = result_type_enref(node->lhs->tp);
-		node->tp = tp;
+		tp = result_type_enref(node->lhs->type);
+		node->type = tp;
 		return;
 	}
 	if (node->kind == ND_DEREF) {
 		sema_rec(node->lhs);
-		tp = result_type_deref(node->lhs->tp);
+		tp = result_type_deref(node->lhs->type);
 		if (tp == NULL) {
 			error("cannot derefer non pointer type");
 		}
-		node->tp = tp;
+		node->type = tp;
 		return;
 	}
 	if (node->kind == ND_RETURN) {
 		sema_rec(node->lhs);
-		tp = node->lhs->tp;
+		tp = node->lhs->type;
 		// XXX: check whether match the returning type of the
 		// function
 		if (tp == NULL || tp->kind == TP_UNDETERMINED) {
 			error("cannot return undetermined type");
 		}
-		node->tp = tp;
+		node->type = tp;
 		return;
 	}
 	if (node->kind == ND_SIZEOF) {
@@ -297,10 +297,10 @@ void sema_rec(Node *node) {
 		} else {
 			sema_rec(node->lhs);
 		}
-		int sz = TypeSize[node->lhs->tp->kind];
-		if (node->lhs->tp->kind == TP_ARRAY) {
-			sz = TypeSize[node->lhs->tp->ptr_to->kind] *
-			     node->lhs->tp->array_size;
+		int sz = TypeSize[node->lhs->type->kind];
+		if (node->lhs->type->kind == TP_ARRAY) {
+			sz = TypeSize[node->lhs->type->ptr_to->kind] *
+			     node->lhs->type->array_size;
 		}
 		Node *sznd = new_node_num(sz);
 		sema_rec(sznd);
@@ -310,17 +310,17 @@ void sema_rec(Node *node) {
 	if (node->kind == '=') {
 		sema_rec(node->lhs);
 		sema_rec(node->rhs);
-		tp = result_type(node->kind, node->lhs->tp, node->rhs->tp);
+		tp = result_type(node->kind, node->lhs->type, node->rhs->type);
 		if (tp == NULL) {
 			error("type unmatch: lhs: %s, rhs: %s",
-			      type_name(node->lhs->tp),
-			      type_name(node->rhs->tp));
+			      type_name(node->lhs->type),
+			      type_name(node->rhs->type));
 		}
-		node->tp = tp;
+		node->type = tp;
 		return;
 	}
 	if (node->kind == ND_NUM) {
-		node->tp = new_type_int();
+		node->type = new_type_int();
 		return;
 	}
 	{
@@ -329,27 +329,29 @@ void sema_rec(Node *node) {
 		sema_rec(lhs);
 		sema_rec(rhs);
 
-		if (lhs->tp->kind == TP_POINTER && rhs->tp->kind == TP_INT) {
-			int sz = TypeSize[lhs->tp->ptr_to->kind];
+		if (lhs->type->kind == TP_POINTER &&
+		    rhs->type->kind == TP_INT) {
+			int sz = TypeSize[lhs->type->ptr_to->kind];
 			rhs = new_node('*', new_node_num(sz), rhs);
-			rhs->tp = new_type_int();
-			rhs->lhs->tp = new_type_int();
+			rhs->type = new_type_int();
+			rhs->lhs->type = new_type_int();
 			node->rhs = rhs;
 		}
-		if (lhs->tp->kind == TP_INT && rhs->tp->kind == TP_POINTER) {
-			int sz = TypeSize[rhs->tp->ptr_to->kind];
+		if (lhs->type->kind == TP_INT &&
+		    rhs->type->kind == TP_POINTER) {
+			int sz = TypeSize[rhs->type->ptr_to->kind];
 			lhs = new_node('*', new_node_num(sz), lhs);
-			lhs->tp = new_type_int();
-			lhs->lhs->tp = new_type_int();
+			lhs->type = new_type_int();
+			lhs->lhs->type = new_type_int();
 			node->lhs = lhs;
 		}
 
-		tp = result_type(node->kind, lhs->tp, rhs->tp);
+		tp = result_type(node->kind, lhs->type, rhs->type);
 		if (tp == NULL) {
 			error("type unmatch: lhs: %s, rhs: %s",
-			      type_name(lhs->tp), type_name(rhs->tp));
+			      type_name(lhs->type), type_name(rhs->type));
 		}
-		node->tp = tp;
+		node->type = tp;
 	}
 }
 
@@ -358,13 +360,13 @@ void sema_toplevel(Node *node) {
 		if (var_duplicated(node->name)) {
 			error("duplicate definition: %s", node->name);
 		}
-		var_put(node->name, node->tp);
+		var_put(node->name, node->type);
 	} else if (node->kind == ND_DEFINE_FUNC) {
 		Var *declared = var_get(node->name);
 		if (declared != NULL) {
 			// XXX: check type
 		}
-		var_put(node->name, node->tp);
+		var_put(node->name, node->type);
 		init_function_scope();
 		for (int i = 0; i < node->params->len; i++) {
 			sema_rec(node->params->data[i]);

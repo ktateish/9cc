@@ -92,7 +92,7 @@ typedef struct Var {
 	struct Var *next;
 	char *name;
 	int offset;
-	Type *tp;
+	Type *type;
 } Var;
 
 struct Node;
@@ -151,7 +151,7 @@ typedef struct Node {
 	Scope *scope;    // for ND_DEFINE_FUNC, ND_BLOCK
 	int max_offset;  // for ND_DEFINE_FUNC
 
-	Type *tp;  // for ND_IDENT
+	Type *type;  // for ND_IDENT
 
 	char *input;  // for ND_DEFINE_INT_VAR, ND_IDENT
 } Node;
