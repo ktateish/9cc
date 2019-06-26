@@ -262,6 +262,7 @@ void sema_rec(Node *node) {
 		return;
 	}
 	if (node->ty == ND_ENREF) {
+		// XXX: add the case for arrays
 		sema_rec(node->lhs);
 		if (node->lhs->ty != ND_IDENT) {
 			error("cannot get address of non-identifier");
