@@ -46,7 +46,10 @@ This repositry is my implementation of 9cc based on [his book '低レイヤを�
 ### Refactoring
 
 * [ ] propagate 'input' to all node types
-* [ ] Rename type to kind
+* [x] Rename type to kind
+* [ ] Separate files
+* [ ] Add rewriting AST rule for `&array_name` case.
+* [ ] Implement selectors for kind of Node and kind of Type of Node
 
 [1]: https://github.com/rui314/9cc
 [2]: https://www.sigbus.info/compilerbook
