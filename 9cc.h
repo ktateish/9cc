@@ -110,7 +110,7 @@ Scope *scope_use(Scope *scope);
 void dump_scope(Scope *scope, int level);
 
 // node types
-enum NodeType {
+enum NodeKind {
 	ND_NUM = 256,
 	ND_DEREF,
 	ND_ENREF,
@@ -132,7 +132,7 @@ enum NodeType {
 };
 
 typedef struct Node {
-	int ty;  // node type
+	int kind;  // node type
 
 	struct Node *lhs, *rhs;      // for binary/unary operators
 	struct Node *cond;	   // for ND_IF, ND_WHILE, ND_FOR

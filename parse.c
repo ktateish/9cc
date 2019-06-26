@@ -92,7 +92,7 @@ char *type_name(Type *tp) {
 // node types
 Node *new_node(int node_type, Node *lhs, Node *rhs) {
 	Node *nd = malloc(sizeof(Node));
-	nd->ty = node_type;
+	nd->kind = node_type;
 	nd->lhs = lhs;
 	nd->rhs = rhs;
 	nd->tp = new_type_undetermined();
@@ -101,7 +101,7 @@ Node *new_node(int node_type, Node *lhs, Node *rhs) {
 
 Node *new_node_declare_func(char *name, Type *tp) {
 	Node *nd = malloc(sizeof(Node));
-	nd->ty = ND_DECLARE_FUNC;
+	nd->kind = ND_DECLARE_FUNC;
 	nd->name = name;
 	nd->tp = tp;
 	return nd;
@@ -110,7 +110,7 @@ Node *new_node_declare_func(char *name, Type *tp) {
 Node *new_node_define_func(char *name, Type *tp, Vector *params, Scope *scope,
 			   Node *body) {
 	Node *nd = malloc(sizeof(Node));
-	nd->ty = ND_DEFINE_FUNC;
+	nd->kind = ND_DEFINE_FUNC;
 	nd->name = name;
 	nd->scope = scope;
 	nd->params = params;
@@ -121,7 +121,7 @@ Node *new_node_define_func(char *name, Type *tp, Vector *params, Scope *scope,
 
 Node *new_node_define_int_var(char *name, Type *tp, char *input) {
 	Node *nd = malloc(sizeof(Node));
-	nd->ty = ND_DEFINE_INT_VAR;
+	nd->kind = ND_DEFINE_INT_VAR;
 	nd->name = name;
 	nd->tp = tp;
 	nd->input = input;
@@ -130,7 +130,7 @@ Node *new_node_define_int_var(char *name, Type *tp, char *input) {
 
 Node *new_node_block(Vector *stmts) {
 	Node *nd = malloc(sizeof(Node));
-	nd->ty = ND_BLOCK;
+	nd->kind = ND_BLOCK;
 	nd->stmts = stmts;
 	nd->tp = new_type_undetermined();
 	return nd;
@@ -138,7 +138,7 @@ Node *new_node_block(Vector *stmts) {
 
 Node *new_node_funcall(char *name, Vector *args) {
 	Node *nd = malloc(sizeof(Node));
-	nd->ty = ND_FUNCALL;
+	nd->kind = ND_FUNCALL;
 	nd->name = name;
 	nd->args = args;
 	nd->tp = new_type_undetermined();
@@ -147,7 +147,7 @@ Node *new_node_funcall(char *name, Vector *args) {
 
 Node *new_node_if(Node *cond, Node *thenc, Node *elsec) {
 	Node *nd = malloc(sizeof(Node));
-	nd->ty = ND_IF;
+	nd->kind = ND_IF;
 	nd->cond = cond;
 	nd->thenc = thenc;
 	nd->elsec = elsec;
@@ -157,7 +157,7 @@ Node *new_node_if(Node *cond, Node *thenc, Node *elsec) {
 
 Node *new_node_while(Node *cond, Node *body) {
 	Node *nd = malloc(sizeof(Node));
-	nd->ty = ND_WHILE;
+	nd->kind = ND_WHILE;
 	nd->cond = cond;
 	nd->body = body;
 	nd->tp = new_type_undetermined();
@@ -166,7 +166,7 @@ Node *new_node_while(Node *cond, Node *body) {
 
 Node *new_node_for(Node *init, Node *cond, Node *update, Node *body) {
 	Node *nd = malloc(sizeof(Node));
-	nd->ty = ND_FOR;
+	nd->kind = ND_FOR;
 	nd->init = init;
 	nd->cond = cond;
 	nd->update = update;
@@ -177,7 +177,7 @@ Node *new_node_for(Node *init, Node *cond, Node *update, Node *body) {
 
 Node *new_node_num(int val) {
 	Node *nd = malloc(sizeof(Node));
-	nd->ty = ND_NUM;
+	nd->kind = ND_NUM;
 	nd->val = val;
 	nd->tp = new_type_undetermined();
 	return nd;
@@ -185,7 +185,7 @@ Node *new_node_num(int val) {
 
 Node *new_node_ident(char *name, char *input) {
 	Node *nd = malloc(sizeof(Node));
-	nd->ty = ND_IDENT;
+	nd->kind = ND_IDENT;
 	nd->name = name;
 	nd->input = input;
 	nd->tp = new_type_undetermined();

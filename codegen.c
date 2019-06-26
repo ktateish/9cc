@@ -8,7 +8,7 @@ int labelseq;
 void gen(Node *node);
 
 void gen_lval(Node *node) {
-	if (node->ty != ND_IDENT) {
+	if (node->kind != ND_IDENT) {
 		error("assigning lvalue is not a variable");
 	}
 
@@ -24,7 +24,7 @@ void gen_lval(Node *node) {
 }
 
 void gen_define_func(Node *node) {
-	if (node->ty != ND_DEFINE_FUNC) {
+	if (node->kind != ND_DEFINE_FUNC) {
 		error("not function definition");
 	}
 	printf("%s:\n", node->name);
@@ -62,7 +62,7 @@ void gen_define_int_var(Node *node) {
 }
 
 void gen_funcall(Node *node) {
-	if (node->ty != ND_FUNCALL) {
+	if (node->kind != ND_FUNCALL) {
 		error("not function call");
 	}
 	int n = node->args->len;
@@ -121,7 +121,7 @@ void gen_funcall(Node *node) {
 }
 
 void gen_if(Node *node) {
-	if (node->ty != ND_IF) {
+	if (node->kind != ND_IF) {
 		error("not if syntax");
 	}
 	int seq = labelseq++;
@@ -148,7 +148,7 @@ void gen_if(Node *node) {
 }
 
 void gen_while(Node *node) {
-	if (node->ty != ND_WHILE) {
+	if (node->kind != ND_WHILE) {
 		error("not while syntax");
 	}
 	int seq = labelseq++;
@@ -164,7 +164,7 @@ void gen_while(Node *node) {
 }
 
 void gen_for(Node *node) {
-	if (node->ty != ND_FOR) {
+	if (node->kind != ND_FOR) {
 		error("not for syntax");
 	}
 	int seq = labelseq++;
@@ -188,7 +188,7 @@ void gen_for(Node *node) {
 }
 
 void gen_return(Node *node) {
-	if (node->ty != ND_RETURN) {
+	if (node->kind != ND_RETURN) {
 		error("not return syntax");
 	}
 	gen(node->lhs);
@@ -199,19 +199,19 @@ void gen_return(Node *node) {
 }
 
 void gen_ident(Node *node) {
-	if (node->ty == ND_IDENT) {
+	if (node->kind == ND_IDENT) {
 		gen_lval(node);
 		printf("  pop rax\n");
 		printf("  mov rax, [rax]\n");
 		printf("  push rax\n");
-	} else if (node->ty == ND_DEREF) {
+	} else if (node->kind == ND_DEREF) {
 		gen(node->lhs);
 		printf("  pop rax\n");
 		printf("  mov rax, [rax]\n");
 		printf("  push rax\n");
-	} else if (node->ty == ND_ENREF) {
+	} else if (node->kind == ND_ENREF) {
 		node = node->lhs;
-		if (node->ty != ND_IDENT) {
+		if (node->kind != ND_IDENT) {
 			error("not identifier");
 		}
 		gen_lval(node);
@@ -221,13 +221,13 @@ void gen_ident(Node *node) {
 }
 
 void gen_assign(Node *node) {
-	if (node->ty != '=') {
+	if (node->kind != '=') {
 		error("not assign syntax");
 	}
 	Node *lhs = node->lhs;
-	if (lhs->ty == ND_IDENT) {
+	if (lhs->kind == ND_IDENT) {
 		gen_lval(node->lhs);
-	} else if (lhs->ty == ND_DEREF) {
+	} else if (lhs->kind == ND_DEREF) {
 		gen(lhs->lhs);
 	}
 	gen(node->rhs);
@@ -245,48 +245,48 @@ void gen_binary_operator(Node *node) {
 	printf("  pop rdi\n");
 	printf("  pop rax\n");
 
-	if (node->ty == '+') {
+	if (node->kind == '+') {
 		printf("  add rax, rdi\n");
-	} else if (node->ty == '-') {
+	} else if (node->kind == '-') {
 		printf("  sub rax, rdi\n");
-	} else if (node->ty == '*') {
+	} else if (node->kind == '*') {
 		printf("  imul rdi\n");
-	} else if (node->ty == '/') {
+	} else if (node->kind == '/') {
 		printf("  cqo\n");
 		printf("  idiv rdi\n");
-	} else if (node->ty == ND_EQ) {
+	} else if (node->kind == ND_EQ) {
 		printf("  cmp rax, rdi\n");
 		printf("  sete al\n");
 		printf("  movzb rax, al\n");
-	} else if (node->ty == ND_NE) {
+	} else if (node->kind == ND_NE) {
 		printf("  cmp rax, rdi\n");
 		printf("  setne al\n");
 		printf("  movzb rax, al\n");
-	} else if (node->ty == '<') {
+	} else if (node->kind == '<') {
 		printf("  cmp rax, rdi\n");
 		printf("  setl al\n");
 		printf("  movzb rax, al\n");
-	} else if (node->ty == ND_LE) {
+	} else if (node->kind == ND_LE) {
 		printf("  cmp rax, rdi\n");
 		printf("  setle al\n");
 		printf("  movzb rax, al\n");
 	} else {
-		error("unknown binary operator: %c", node->ty);
+		error("unknown binary operator: %c", node->kind);
 	}
 	printf("  push rax\n");
 }
 
 void gen(Node *node) {
 	Scope *saved;
-	if (node->ty == ND_NUM) {
+	if (node->kind == ND_NUM) {
 		printf("  push %d\n", node->val);
-	} else if (node->ty == ND_DECLARE_FUNC) {
+	} else if (node->kind == ND_DECLARE_FUNC) {
 		;
-	} else if (node->ty == ND_DEFINE_FUNC) {
+	} else if (node->kind == ND_DEFINE_FUNC) {
 		gen_define_func(node);
-	} else if (node->ty == ND_DEFINE_INT_VAR) {
+	} else if (node->kind == ND_DEFINE_INT_VAR) {
 		gen_define_int_var(node);
-	} else if (node->ty == ND_BLOCK) {
+	} else if (node->kind == ND_BLOCK) {
 		saved = scope_use(node->scope);
 		for (int i = 0; i < node->stmts->len; i++) {
 			gen(node->stmts->data[i]);
@@ -295,20 +295,20 @@ void gen(Node *node) {
 			}
 		}
 		scope_use(saved);
-	} else if (node->ty == ND_FUNCALL) {
+	} else if (node->kind == ND_FUNCALL) {
 		gen_funcall(node);
-	} else if (node->ty == ND_IF) {
+	} else if (node->kind == ND_IF) {
 		gen_if(node);
-	} else if (node->ty == ND_WHILE) {
+	} else if (node->kind == ND_WHILE) {
 		gen_while(node);
-	} else if (node->ty == ND_FOR) {
+	} else if (node->kind == ND_FOR) {
 		gen_for(node);
-	} else if (node->ty == ND_RETURN) {
+	} else if (node->kind == ND_RETURN) {
 		gen_return(node);
-	} else if (node->ty == ND_IDENT || node->ty == ND_DEREF ||
-		   node->ty == ND_ENREF) {
+	} else if (node->kind == ND_IDENT || node->kind == ND_DEREF ||
+		   node->kind == ND_ENREF) {
 		gen_ident(node);
-	} else if (node->ty == '=') {
+	} else if (node->kind == '=') {
 		gen_assign(node);
 	} else {
 		gen_binary_operator(node);

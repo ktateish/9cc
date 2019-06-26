@@ -90,7 +90,7 @@ void init_function_scope() {
 }
 
 void set_function_scope(Node *node) {
-	if (node->ty != ND_DEFINE_FUNC) {
+	if (node->kind != ND_DEFINE_FUNC) {
 		error("Cannot set function scope to non function node");
 	}
 	node->scope = scope;
@@ -99,7 +99,7 @@ void set_function_scope(Node *node) {
 }
 
 void set_scope(Node *node) {
-	if (node->ty != ND_BLOCK) {
+	if (node->kind != ND_BLOCK) {
 		error("invalid node to set scope");
 	}
 	node->scope = scope;
@@ -192,14 +192,14 @@ void sema_rec(Node *node) {
 	if (node == NULL) return;
 
 	Type *tp;
-	if (node->ty == ND_DEFINE_INT_VAR) {
+	if (node->kind == ND_DEFINE_INT_VAR) {
 		if (var_duplicated(node->name)) {
 			error_at(node->input, "duplicate definition");
 		}
 		var_put(node->name, node->tp);
 		return;
 	}
-	if (node->ty == ND_IDENT) {
+	if (node->kind == ND_IDENT) {
 		sema_ident(node);
 		if (node->tp->ty == TP_ARRAY) {
 			Type *tp = result_type_enref(node->tp->ptr_to);
@@ -209,7 +209,7 @@ void sema_rec(Node *node) {
 		}
 		return;
 	}
-	if (node->ty == ND_BLOCK) {
+	if (node->kind == ND_BLOCK) {
 		push_scope();
 		for (int i = 0; i < node->stmts->len; i++) {
 			sema_rec(node->stmts->data[i]);
@@ -218,7 +218,7 @@ void sema_rec(Node *node) {
 		pop_scope();
 		return;
 	}
-	if (node->ty == ND_FUNCALL) {
+	if (node->kind == ND_FUNCALL) {
 		Var *v = var_get(node->name);
 		if (v == NULL) {
 			error("undefined function: %s", node->name);
@@ -243,35 +243,35 @@ void sema_rec(Node *node) {
 		node->tp = tp->returning;
 		return;
 	}
-	if (node->ty == ND_IF) {
+	if (node->kind == ND_IF) {
 		sema_rec(node->cond);
 		sema_rec(node->thenc);
 		sema_rec(node->elsec);
 		return;
 	}
-	if (node->ty == ND_WHILE) {
+	if (node->kind == ND_WHILE) {
 		sema_rec(node->cond);
 		sema_rec(node->body);
 		return;
 	}
-	if (node->ty == ND_FOR) {
+	if (node->kind == ND_FOR) {
 		sema_rec(node->init);
 		sema_rec(node->cond);
 		sema_rec(node->update);
 		sema_rec(node->body);
 		return;
 	}
-	if (node->ty == ND_ENREF) {
+	if (node->kind == ND_ENREF) {
 		// XXX: add the case for arrays
 		sema_rec(node->lhs);
-		if (node->lhs->ty != ND_IDENT) {
+		if (node->lhs->kind != ND_IDENT) {
 			error("cannot get address of non-identifier");
 		}
 		tp = result_type_enref(node->lhs->tp);
 		node->tp = tp;
 		return;
 	}
-	if (node->ty == ND_DEREF) {
+	if (node->kind == ND_DEREF) {
 		sema_rec(node->lhs);
 		tp = result_type_deref(node->lhs->tp);
 		if (tp == NULL) {
@@ -280,7 +280,7 @@ void sema_rec(Node *node) {
 		node->tp = tp;
 		return;
 	}
-	if (node->ty == ND_RETURN) {
+	if (node->kind == ND_RETURN) {
 		sema_rec(node->lhs);
 		tp = node->lhs->tp;
 		// XXX: check whether match the returning type of the
@@ -291,8 +291,8 @@ void sema_rec(Node *node) {
 		node->tp = tp;
 		return;
 	}
-	if (node->ty == ND_SIZEOF) {
-		if (node->lhs->ty == ND_IDENT) {
+	if (node->kind == ND_SIZEOF) {
+		if (node->lhs->kind == ND_IDENT) {
 			sema_ident(node->lhs);
 		} else {
 			sema_rec(node->lhs);
@@ -307,10 +307,10 @@ void sema_rec(Node *node) {
 		*node = *sznd;
 		return;
 	}
-	if (node->ty == '=') {
+	if (node->kind == '=') {
 		sema_rec(node->lhs);
 		sema_rec(node->rhs);
-		tp = result_type(node->ty, node->lhs->tp, node->rhs->tp);
+		tp = result_type(node->kind, node->lhs->tp, node->rhs->tp);
 		if (tp == NULL) {
 			error("type unmatch: lhs: %s, rhs: %s",
 			      type_name(node->lhs->tp),
@@ -319,7 +319,7 @@ void sema_rec(Node *node) {
 		node->tp = tp;
 		return;
 	}
-	if (node->ty == ND_NUM) {
+	if (node->kind == ND_NUM) {
 		node->tp = new_type_int();
 		return;
 	}
@@ -344,7 +344,7 @@ void sema_rec(Node *node) {
 			node->lhs = lhs;
 		}
 
-		tp = result_type(node->ty, lhs->tp, rhs->tp);
+		tp = result_type(node->kind, lhs->tp, rhs->tp);
 		if (tp == NULL) {
 			error("type unmatch: lhs: %s, rhs: %s",
 			      type_name(lhs->tp), type_name(rhs->tp));
@@ -354,12 +354,12 @@ void sema_rec(Node *node) {
 }
 
 void sema_toplevel(Node *node) {
-	if (node->ty == ND_DECLARE_FUNC) {
+	if (node->kind == ND_DECLARE_FUNC) {
 		if (var_duplicated(node->name)) {
 			error("duplicate definition: %s", node->name);
 		}
 		var_put(node->name, node->tp);
-	} else if (node->ty == ND_DEFINE_FUNC) {
+	} else if (node->kind == ND_DEFINE_FUNC) {
 		Var *declared = var_get(node->name);
 		if (declared != NULL) {
 			// XXX: check type

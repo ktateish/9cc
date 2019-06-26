@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
 	// output first part assembry
 	printf(".intel_syntax noprefix\n");
 	for (int i = 0; code(i) != NULL; i++) {
-		if (code(i)->ty == ND_DEFINE_FUNC) {
+		if (code(i)->kind == ND_DEFINE_FUNC) {
 			printf(".global %s\n", code(i)->name);
 		}
 	}

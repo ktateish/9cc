@@ -49,22 +49,22 @@ void dump_scope(Scope *scope, int level);
 void dump_node(Node *node, int level) {
 	fprintf(stderr, "%*s--\n", level * 2, "");
 	fprintf(stderr, "%*sNode: ", level * 2, "");
-	if (node->ty == ND_DEREF) {
+	if (node->kind == ND_DEREF) {
 		fprintf(stderr, "DEREF\n");
 		fprintf(stderr, "%*sType: %s\n", level * 2, "",
 			type_name(node->tp));
 		dump_node_rec(node->lhs, level + 1);
-	} else if (node->ty == ND_ENREF) {
+	} else if (node->kind == ND_ENREF) {
 		fprintf(stderr, "ENREF\n");
 		fprintf(stderr, "%*sType: %s\n", level * 2, "",
 			type_name(node->tp));
 		dump_node_rec(node->lhs, level + 1);
-	} else if (node->ty == ND_DECLARE_FUNC) {
+	} else if (node->kind == ND_DECLARE_FUNC) {
 		fprintf(stderr, "DECLARE_FUNC\n");
 		fprintf(stderr, "%*sName: %s\n", level * 2, "", node->name);
 		fprintf(stderr, "%*sType: %s\n", level * 2, "",
 			type_name(node->tp));
-	} else if (node->ty == ND_DEFINE_FUNC) {
+	} else if (node->kind == ND_DEFINE_FUNC) {
 		fprintf(stderr, "DEFINE_FUNC\n");
 		fprintf(stderr, "%*sName: %s\n", level * 2, "", node->name);
 		fprintf(stderr, "%*sType: %s\n", level * 2, "",
@@ -77,19 +77,19 @@ void dump_node(Node *node, int level) {
 		dump_scope(node->scope, level + 1);
 		fprintf(stderr, "%*s--\n", level * 2, "");
 		dump_node_rec(node->body, level + 1);
-	} else if (node->ty == ND_DEFINE_INT_VAR) {
+	} else if (node->kind == ND_DEFINE_INT_VAR) {
 		fprintf(stderr, "DEFINE_INT_VAR\n");
 		fprintf(stderr, "%*sName: %s\n", level * 2, "", node->name);
 		fprintf(stderr, "%*sType: %s\n", level * 2, "",
 			type_name(node->tp));
-	} else if (node->ty == ND_BLOCK) {
+	} else if (node->kind == ND_BLOCK) {
 		fprintf(stderr, "BLOCK\n");
 		fprintf(stderr, "%*sVars:\n", level * 2, "");
 		dump_scope(node->scope, level + 1);
 		for (int i = 0; i < node->stmts->len; i++) {
 			dump_node_rec(node->stmts->data[i], level + 1);
 		}
-	} else if (node->ty == ND_FUNCALL) {
+	} else if (node->kind == ND_FUNCALL) {
 		fprintf(stderr, "FUNCALL\n");
 		fprintf(stderr, "%*sName: %s\n", level * 2, "", node->name);
 		fprintf(stderr, "%*sType: %s\n", level * 2, "",
@@ -98,61 +98,61 @@ void dump_node(Node *node, int level) {
 		for (int i = 0; i < node->args->len; i++) {
 			dump_node_rec(node->args->data[i], level + 1);
 		}
-	} else if (node->ty == ND_IF) {
+	} else if (node->kind == ND_IF) {
 		fprintf(stderr, "WHILE\n");
 		dump_node_rec(node->cond, level + 1);
 		dump_node_rec(node->thenc, level + 1);
 		dump_node_rec(node->elsec, level + 1);
-	} else if (node->ty == ND_WHILE) {
+	} else if (node->kind == ND_WHILE) {
 		fprintf(stderr, "WHILE\n");
 		dump_node_rec(node->cond, level + 1);
 		dump_node_rec(node->body, level + 1);
-	} else if (node->ty == ND_FOR) {
+	} else if (node->kind == ND_FOR) {
 		fprintf(stderr, "FOR\n");
 		dump_node_rec(node->init, level + 1);
 		dump_node_rec(node->cond, level + 1);
 		dump_node_rec(node->update, level + 1);
 		dump_node_rec(node->body, level + 1);
-	} else if (node->ty == ND_RETURN) {
+	} else if (node->kind == ND_RETURN) {
 		fprintf(stderr, "RETURN\n");
 		fprintf(stderr, "%*sType: %s\n", level * 2, "",
 			type_name(node->tp));
 		dump_node_rec(node->lhs, level + 1);
-	} else if (node->ty == ND_SIZEOF) {
+	} else if (node->kind == ND_SIZEOF) {
 		fprintf(stderr, "SIZEOF\n");
 		fprintf(stderr, "%*sType: %s\n", level * 2, "",
 			type_name(node->tp));
 		dump_node_rec(node->lhs, level + 1);
-	} else if (node->ty == ND_IDENT) {
+	} else if (node->kind == ND_IDENT) {
 		fprintf(stderr, "IDENT\n");
 		fprintf(stderr, "%*sName: %s\n", level * 2, "", node->name);
 		fprintf(stderr, "%*sType: %s\n", level * 2, "",
 			type_name(node->tp));
-	} else if (node->ty == ND_EQ) {
+	} else if (node->kind == ND_EQ) {
 		fprintf(stderr, "'=='\n");
 		fprintf(stderr, "%*sType: %s\n", level * 2, "",
 			type_name(node->tp));
 		dump_node_rec(node->lhs, level + 1);
 		dump_node_rec(node->rhs, level + 1);
-	} else if (node->ty == ND_NE) {
+	} else if (node->kind == ND_NE) {
 		fprintf(stderr, "'!='\n");
 		fprintf(stderr, "%*sType: %s\n", level * 2, "",
 			type_name(node->tp));
 		dump_node_rec(node->lhs, level + 1);
 		dump_node_rec(node->rhs, level + 1);
-	} else if (node->ty == ND_LE) {
+	} else if (node->kind == ND_LE) {
 		fprintf(stderr, "'<='\n");
 		fprintf(stderr, "%*sType: %s\n", level * 2, "",
 			type_name(node->tp));
 		dump_node_rec(node->lhs, level + 1);
 		dump_node_rec(node->rhs, level + 1);
-	} else if (node->ty == ND_NUM) {
+	} else if (node->kind == ND_NUM) {
 		fprintf(stderr, "NUMBER\n");
 		fprintf(stderr, "%*sType: %s\n", level * 2, "",
 			type_name(node->tp));
 		fprintf(stderr, "%*sValue: %d\n", level * 2, "", node->val);
 	} else {
-		fprintf(stderr, "%c\n", node->ty);
+		fprintf(stderr, "%c\n", node->kind);
 		fprintf(stderr, "%*sType: %s\n", level * 2, "",
 			type_name(node->tp));
 		dump_node_rec(node->lhs, level + 1);
