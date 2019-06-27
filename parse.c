@@ -288,14 +288,6 @@ Node *term() {
 		return identifier();
 	}
 
-	if (consume('*')) {
-		return new_node(ND_DEREF, term(), NULL);
-	}
-
-	if (consume('&')) {
-		return new_node(ND_ENREF, identifier(), NULL);
-	}
-
 	error_at(tokens(pos)->input, "invalid token");
 	return NULL;
 }
