@@ -125,6 +125,17 @@ Node *new_node_define_int_var(char *name, Type *type, char *input) {
 	nd->name = name;
 	nd->type = type;
 	nd->input = input;
+	nd->is_global = 0;
+	return nd;
+}
+
+Node *new_node_define_global_int_var(char *name, Type *type, char *input) {
+	Node *nd = malloc(sizeof(Node));
+	nd->kind = ND_DEFINE_INT_VAR;
+	nd->name = name;
+	nd->type = type;
+	nd->input = input;
+	nd->is_global = 1;
 	return nd;
 }
 
@@ -571,23 +582,7 @@ Vector *define_func_params() {
 	return prms;
 }
 
-Node *define_func() {
-	if (!consume(TK_INT)) {
-		error_at(tokens(pos)->input, "not 'int'");
-	}
-
-	Type *returning = new_type_int();
-
-	while (consume('*')) {
-		returning = new_type_ptr(returning);
-	}
-
-	if (tokens(pos)->kind != TK_IDENT) {
-		error_at(tokens(pos)->input, "not an identifier");
-	}
-
-	char *name = tokens(pos++)->name;
-
+Node *define_func(char *name, Type *returning) {
 	Vector *params = define_func_params();
 
 	Vector *param_types = new_vector();
@@ -615,7 +610,40 @@ Node *define_func() {
 	return node;
 }
 
-Node *definition() { return define_func(); }
+Node *definition() {
+	if (!consume(TK_INT)) {
+		error_at(tokens(pos)->input, "not 'int'");
+	}
+
+	Type *tp = new_type_int();
+
+	while (consume('*')) {
+		tp = new_type_ptr(tp);
+	}
+
+	if (tokens(pos)->kind != TK_IDENT) {
+		error_at(tokens(pos)->input, "not an identifier");
+	}
+
+	Token *tk = tokens(pos++);
+
+	if (tokens(pos)->kind == '(') {
+		return define_func(tk->name, tp);
+	} else if (consume('[')) {
+		if (tokens(pos)->kind != TK_NUM) {
+			error_at(tokens(pos)->input, "not a number");
+		}
+		tp = new_type_array(tp, tokens(pos++)->val);
+		if (!consume(']')) {
+			error_at(tokens(pos)->input, "not ']'");
+		}
+	}
+	if (!consume(';')) {
+		error_at(tokens(pos)->input, "not ';'");
+	}
+
+	return new_node_define_global_int_var(tk->name, tp, tk->input);
+}
 
 void program() {
 	init_code();

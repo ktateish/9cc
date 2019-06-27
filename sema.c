@@ -17,12 +17,13 @@ Scope *global_scope;
 Scope *scope;
 int max_offset;
 
-Var *new_var(Var *next, char *name, int offset, Type *type) {
+Var *new_var(Var *next, char *name, int offset, Type *type, int is_global) {
 	Var *var = malloc(sizeof(Var));
 	var->next = next;
 	var->name = name;
 	var->offset = offset;
 	var->type = type;
+	var->is_global = is_global;
 	return var;
 }
 
@@ -30,13 +31,16 @@ void var_use(Node *node) { scope = node->scope; }
 
 void var_put(char *name, Type *tp) {
 	int add = 8;
+	int is_global = 0;
 	if (scope == global_scope) {
 		add = 0;
+		is_global = 1;
 	}
 	if (tp->kind == TP_ARRAY) {
 		add = 8 * tp->array_size;
 	}
-	scope->vars = new_var(scope->vars, name, scope->vars->offset + add, tp);
+	scope->vars = new_var(scope->vars, name, scope->vars->offset + add, tp,
+			      is_global);
 	if (max_offset < scope->vars->offset) {
 		max_offset = scope->vars->offset;
 	}
@@ -72,7 +76,7 @@ Scope *new_scope(Scope *next) {
 	if (next != NULL) {
 		offset = next->vars->offset;
 	}
-	s->vars = s->sentinel = new_var(NULL, "", offset, NULL);
+	s->vars = s->sentinel = new_var(NULL, "", offset, NULL, 0);
 	return s;
 }
 
@@ -186,6 +190,7 @@ void sema_ident(Node *node) {
 		error_at(node->input, "unknown variable");
 	}
 	node->type = v->type;
+	node->is_global = v->is_global;
 }
 
 void sema_rec(Node *node) {

@@ -93,6 +93,7 @@ typedef struct Var {
 	char *name;
 	int offset;
 	Type *type;
+	int is_global;
 } Var;
 
 struct Node;
@@ -142,7 +143,8 @@ typedef struct Node {
 
 	int val;  // for ND_NUM
 
-	char *name;  // for ND_IDENT, ND_DEFINE_FUNC
+	char *name;     // for ND_IDENT, ND_DEFINE_FUNC
+	int is_global;  // for ND_IDENT
 
 	Vector *stmts;  // for ND_BLOCK
 	Vector *args;   // for ND_FUNCALL
@@ -154,6 +156,7 @@ typedef struct Node {
 	Type *type;  // for ND_IDENT
 
 	char *input;  // for ND_DEFINE_INT_VAR, ND_IDENT
+
 } Node;
 
 Node *new_node(int node_type, Node *lhs, Node *rhs);
