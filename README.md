@@ -33,7 +33,7 @@ This repositry is my implementation of 9cc based on [his book '低レイヤを�
     * [x] Pointer addition/subtraction
     * [x] Support `sizeof` operator
     * [x] Support array type
-    * [ ] Index of array
+    * [x] Index of array
     * [ ] Global variables
     * [ ] Support `char *` type
     * [ ] String literal

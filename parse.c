@@ -271,6 +271,18 @@ Node *identifier() {
 	return new_node_funcall(name, args);
 }
 
+Node *array_index(Node *pre) {
+	if (!consume('[')) {
+		return pre;
+	}
+
+	Node *node = expr();
+	if (!consume(']')) {
+		error_at(tokens(pos)->input, "close ']' not found");
+	}
+	return new_node(ND_DEREF, new_node('+', pre, node), NULL);
+}
+
 Node *term() {
 	if (consume('(')) {
 		Node *node = expr();
@@ -281,11 +293,13 @@ Node *term() {
 	}
 
 	if (tokens(pos)->kind == TK_NUM) {
-		return new_node_num(tokens(pos++)->val);
+		Node *node = new_node_num(tokens(pos++)->val);
+		return array_index(node);
 	}
 
 	if (tokens(pos)->kind == TK_IDENT) {
-		return identifier();
+		Node *node = identifier();
+		return array_index(node);
 	}
 
 	error_at(tokens(pos)->input, "invalid token");
