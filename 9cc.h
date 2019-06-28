@@ -87,6 +87,9 @@ typedef struct Type {
 
 Type *new_type_int();
 Type *new_type_ptr(Type *ptr_to);
+Type *new_type_function(Vector *params, Type *returning);
+Type *new_type_array(Type *ptr_to, int array_size);
+Type *new_type_undetermined();
 char *type_name(Type *tp);
 int type_size(Type *tp);
 int type_size_refering(Type *tp);
