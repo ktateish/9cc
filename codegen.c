@@ -199,25 +199,34 @@ void gen_return(Node *node) {
 }
 
 void gen_ident(Node *node) {
-	if (node->kind == ND_IDENT) {
-		gen_lval(node);
-		printf("  pop rax\n");
-		printf("  mov rax, [rax]\n");
-		printf("  push rax\n");
-	} else if (node->kind == ND_DEREF) {
-		gen(node->lhs);
-		printf("  pop rax\n");
-		printf("  mov rax, [rax]\n");
-		printf("  push rax\n");
-	} else if (node->kind == ND_ENREF) {
-		node = node->lhs;
-		if (node->kind != ND_IDENT) {
-			error("not identifier");
-		}
-		gen_lval(node);
-	} else {
+	if (node->kind != ND_IDENT) {
 		error("not identifier");
 	}
+	gen_lval(node);
+	printf("  pop rax\n");
+	printf("  mov rax, [rax]\n");
+	printf("  push rax\n");
+}
+
+void gen_deref(Node *node) {
+	if (node->kind != ND_DEREF) {
+		error("not identifier");
+	}
+	gen(node->lhs);
+	printf("  pop rax\n");
+	printf("  mov rax, [rax]\n");
+	printf("  push rax\n");
+}
+
+void gen_enref(Node *node) {
+	if (node->kind != ND_ENREF) {
+		error("not identifier");
+	}
+	node = node->lhs;
+	if (node->kind != ND_IDENT) {
+		error("not identifier");
+	}
+	gen_lval(node);
 }
 
 void gen_assign(Node *node) {
@@ -305,9 +314,12 @@ void gen(Node *node) {
 		gen_for(node);
 	} else if (node->kind == ND_RETURN) {
 		gen_return(node);
-	} else if (node->kind == ND_IDENT || node->kind == ND_DEREF ||
-		   node->kind == ND_ENREF) {
+	} else if (node->kind == ND_IDENT) {
 		gen_ident(node);
+	} else if (node->kind == ND_DEREF) {
+		gen_deref(node);
+	} else if (node->kind == ND_ENREF) {
+		gen_enref(node);
 	} else if (node->kind == '=') {
 		gen_assign(node);
 	} else {

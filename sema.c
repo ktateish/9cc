@@ -378,6 +378,11 @@ void sema_toplevel(Node *node) {
 		}
 		sema_rec(node->body);
 		set_function_scope(node);
+	} else if (node->kind == ND_DEFINE_INT_VAR) {
+		if (var_duplicated(node->name)) {
+			error("duplicate definition: %s", node->name);
+		}
+		var_put(node->name, node->type);
 	}
 }
 
