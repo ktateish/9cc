@@ -62,6 +62,8 @@ void tokenize(char *p);
 //
 // Parser
 //
+struct Node;
+typedef struct Node Node;
 
 // position for parser
 extern int pos;
@@ -97,8 +99,7 @@ typedef struct Var {
 	Type *type;
 } Var;
 
-struct Node;
-void var_use(struct Node *node);
+void var_use(Node *node);
 void var_put(char *name, Type *tp);
 Var *var_get(char *name);
 int var_duplicated(char *name);
@@ -112,8 +113,8 @@ typedef struct Scope {
 Scope *scope_use(Scope *scope);
 void init_global_scope();
 void init_function_scope();
-void set_function_scope(struct Node *node);
-void set_scope(struct Node *node);
+void set_function_scope(Node *node);
+void set_scope(Node *node);
 void push_scope();
 void pop_scope();
 void dump_scope(Scope *scope, int level);
@@ -140,14 +141,14 @@ enum NodeKind {
 	ND_LE,
 };
 
-typedef struct Node {
+struct Node {
 	int kind;  // node type
 
-	struct Node *lhs, *rhs;      // for binary/unary operators
-	struct Node *cond;	   // for ND_IF, ND_WHILE, ND_FOR
-	struct Node *thenc, *elsec;  // for ND_IF syntax
-	struct Node *init, *update;  // for ND_FOR syntax
-	struct Node *body;	   // for ND_DEFINE_FUNC, ND_WHILE, ND_FOR
+	Node *lhs, *rhs;      // for binary/unary operators
+	Node *cond;	   // for ND_IF, ND_WHILE, ND_FOR
+	Node *thenc, *elsec;  // for ND_IF syntax
+	Node *init, *update;  // for ND_FOR syntax
+	Node *body;	   // for ND_DEFINE_FUNC, ND_WHILE, ND_FOR
 
 	int val;  // for ND_NUM
 
@@ -163,7 +164,7 @@ typedef struct Node {
 	Type *type;  // for ND_IDENT
 
 	char *input;  // for ND_DEFINE_INT_VAR, ND_IDENT
-} Node;
+};
 
 Node *new_node(int node_type, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
