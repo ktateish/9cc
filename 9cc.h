@@ -99,7 +99,9 @@ typedef struct Var {
 
 struct Node;
 void var_use(struct Node *node);
+void var_put(char *name, Type *tp);
 Var *var_get(char *name);
+int var_duplicated(char *name);
 
 typedef struct Scope {
 	struct Scope *next;
@@ -107,8 +109,13 @@ typedef struct Scope {
 	Var *sentinel;
 } Scope;
 
-void init_global_scope();
 Scope *scope_use(Scope *scope);
+void init_global_scope();
+void init_function_scope();
+void set_function_scope(struct Node *node);
+void set_scope(struct Node *node);
+void push_scope();
+void pop_scope();
 void dump_scope(Scope *scope, int level);
 
 // node types
