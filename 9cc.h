@@ -86,6 +86,8 @@ typedef struct Type {
 Type *new_type_int();
 Type *new_type_ptr(Type *ptr_to);
 char *type_name(Type *tp);
+int type_size(Type *tp);
+int type_size_refering(Type *tp);
 
 // variables
 typedef struct Var {

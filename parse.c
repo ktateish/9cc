@@ -89,6 +89,20 @@ char *type_name(Type *tp) {
 	return "UNKNOWN (i.e. not implemented)";
 }
 
+int type_size(Type *tp) {
+	if (tp->kind == TP_INT) return 4;
+	if (tp->kind == TP_POINTER) return 8;
+	if (tp->kind == TP_FUNCTION) return 8;
+	if (tp->kind == TP_ARRAY) return type_size(tp->ptr_to) * tp->array_size;
+	return -1000000007;
+}
+
+int type_size_refering(Type *tp) {
+	if (tp->kind != TP_POINTER)
+		error("type_size_refering(): must be pointer");
+	return type_size(tp->ptr_to);
+}
+
 // node types
 Node *new_node(int node_type, Node *lhs, Node *rhs) {
 	Node *nd = malloc(sizeof(Node));

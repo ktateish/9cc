@@ -6,13 +6,6 @@
 
 #include "9cc.h"
 
-int TypeSize[] = {
-    0,  // TP_UNDETERMINED,
-    4,  // TP_INT,
-    8,  // TP_POINTER,
-    8,  // TP_FUNCTION,
-};
-
 Scope *global_scope;
 Scope *scope;
 int max_offset;
@@ -297,11 +290,7 @@ void sema_rec(Node *node) {
 		} else {
 			sema_rec(node->lhs);
 		}
-		int sz = TypeSize[node->lhs->type->kind];
-		if (node->lhs->type->kind == TP_ARRAY) {
-			sz = TypeSize[node->lhs->type->ptr_to->kind] *
-			     node->lhs->type->array_size;
-		}
+		int sz = type_size(node->lhs->type);
 		Node *sznd = new_node_num(sz);
 		sema_rec(sznd);
 		*node = *sznd;
@@ -331,7 +320,7 @@ void sema_rec(Node *node) {
 
 		if (lhs->type->kind == TP_POINTER &&
 		    rhs->type->kind == TP_INT) {
-			int sz = TypeSize[lhs->type->ptr_to->kind];
+			int sz = type_size_refering(lhs->type);
 			rhs = new_node('*', new_node_num(sz), rhs);
 			rhs->type = new_type_int();
 			rhs->lhs->type = new_type_int();
@@ -339,7 +328,7 @@ void sema_rec(Node *node) {
 		}
 		if (lhs->type->kind == TP_INT &&
 		    rhs->type->kind == TP_POINTER) {
-			int sz = TypeSize[rhs->type->ptr_to->kind];
+			int sz = type_size_refering(rhs->type);
 			lhs = new_node('*', new_node_num(sz), lhs);
 			lhs->type = new_type_int();
 			lhs->lhs->type = new_type_int();

@@ -51,7 +51,7 @@ This repositry is my implementation of 9cc based on [his book '低レイヤを�
 * [ ] Add rewriting AST rule for `&array_name` case.
 * [ ] Implement selectors for kind of Node and kind of Type of Node
 * [ ] Use 4-byte size for `int`
-* [ ] Implement functions for Type size
+* [x] Implement functions for Type size
 
 [1]: https://github.com/rui314/9cc
 [2]: https://www.sigbus.info/compilerbook
