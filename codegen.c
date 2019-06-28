@@ -12,6 +12,12 @@ void gen_lval(Node *node) {
 		error("assigning lvalue is not a variable");
 	}
 
+	if (node->is_global) {
+		printf("  mov rax, %s[rip]\n", node->name);
+		printf("  push rax\n");
+		return;
+	}
+
 	Var *v = var_get(node->name);
 	if (v == NULL) {
 		error("unknown variable: %s", node->name);
@@ -54,6 +60,16 @@ void gen_define_func(Node *node) {
 		}
 	}
 	gen(node->body);
+}
+
+void gen_define_global_int_var(Node *node) {
+	printf("%s:\n", node->name);
+	int sz = 8;
+	if (node->type->kind == TP_ARRAY) {
+		sz = sz * node->type->array_size;
+	}
+	printf("  .zero %d\n", sz);
+	return;
 }
 
 void gen_define_int_var(Node *node) {
@@ -294,7 +310,11 @@ void gen(Node *node) {
 	} else if (node->kind == ND_DEFINE_FUNC) {
 		gen_define_func(node);
 	} else if (node->kind == ND_DEFINE_INT_VAR) {
-		gen_define_int_var(node);
+		if (node->is_global) {
+			gen_define_global_int_var(node);
+		} else {
+			gen_define_int_var(node);
+		}
 	} else if (node->kind == ND_BLOCK) {
 		saved = scope_use(node->scope);
 		for (int i = 0; i < node->stmts->len; i++) {

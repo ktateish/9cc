@@ -87,6 +87,8 @@ Type *new_type_int();
 Type *new_type_ptr(Type *ptr_to);
 char *type_name(Type *tp);
 
+extern int TypeSize[];
+
 // variables
 typedef struct Var {
 	struct Var *next;

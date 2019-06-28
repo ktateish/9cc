@@ -163,5 +163,6 @@ try 3 "int main() { int a[4]; a[0] = 1; a[1] = 2; a[2] = 3; a[3] = 4; return a[2
 try 4 "int main() { int a[4]; a[0] = 1; a[1] = 2; a[2] = 3; a[3] = 4; return a[3]; }"
 try 10 "int main() { int a[4]; int i; int s; for (i = 0; i < 4; i = i+1) { a[i] = i+1; } s = 0; for (i = 0; i < 4; i = i+1) { s = s + a[i]; } return s; }"
 
+try 3 "int x; int y[20]; int main() { x = 1; y[5] = 2; return x + y[5]; }"
 
 echo OK
