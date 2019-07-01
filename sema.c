@@ -99,8 +99,8 @@ void sema_rec(Node *node) {
 	}
 	if (node->kind == ND_BLOCK) {
 		push_scope();
-		for (int i = 0; i < node->stmts->len; i++) {
-			sema_rec(node->stmts->data[i]);
+		for (int i = 0; i < vec_len(node->stmts); i++) {
+			sema_rec(vec_at(node->stmts, i));
 		}
 		set_scope(node);
 		pop_scope();
@@ -115,10 +115,10 @@ void sema_rec(Node *node) {
 		if (tp->kind != TP_FUNCTION) {
 			error("cannot call non-function type: %s", node->name);
 		}
-		for (int i = 0; i < node->args->len; i++) {
-			sema_rec(node->args->data[i]);
-			Type *lhs = tp->params->data[i];
-			Node *nd = node->args->data[i];
+		for (int i = 0; i < vec_len(node->args); i++) {
+			sema_rec(vec_at(node->args, i));
+			Type *lhs = vec_at(tp->params, i);
+			Node *nd = vec_at(node->args, i);
 			Type *rhs = nd->type;
 			if (!assignable(lhs, rhs)) {
 				error(
@@ -252,8 +252,8 @@ void sema_toplevel(Node *node) {
 		}
 		var_put(node->name, node->type);
 		init_function_scope();
-		for (int i = 0; i < node->params->len; i++) {
-			sema_rec(node->params->data[i]);
+		for (int i = 0; i < vec_len(node->params); i++) {
+			sema_rec(vec_at(node->params, i));
 		}
 		sema_rec(node->body);
 		set_function_scope(node);

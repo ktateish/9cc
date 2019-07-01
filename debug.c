@@ -70,8 +70,8 @@ void dump_node(Node *node, int level) {
 		fprintf(stderr, "%*sType: %s\n", level * 2, "",
 			type_name(node->type));
 		fprintf(stderr, "%*sParams:\n", level * 2, "");
-		for (int i = 0; i < node->params->len; i++) {
-			dump_node_rec(node->params->data[i], level + 1);
+		for (int i = 0; i < vec_len(node->params); i++) {
+			dump_node_rec(vec_at(node->params, i), level + 1);
 		}
 		fprintf(stderr, "%*sVars:\n", level * 2, "");
 		dump_scope(node->scope, level + 1);
@@ -86,8 +86,8 @@ void dump_node(Node *node, int level) {
 		fprintf(stderr, "BLOCK\n");
 		fprintf(stderr, "%*sVars:\n", level * 2, "");
 		dump_scope(node->scope, level + 1);
-		for (int i = 0; i < node->stmts->len; i++) {
-			dump_node_rec(node->stmts->data[i], level + 1);
+		for (int i = 0; i < vec_len(node->stmts); i++) {
+			dump_node_rec(vec_at(node->stmts, i), level + 1);
 		}
 	} else if (node->kind == ND_FUNCALL) {
 		fprintf(stderr, "FUNCALL\n");
@@ -95,8 +95,8 @@ void dump_node(Node *node, int level) {
 		fprintf(stderr, "%*sType: %s\n", level * 2, "",
 			type_name(node->type));
 		fprintf(stderr, "%*sArgs:\n", level * 2, "");
-		for (int i = 0; i < node->args->len; i++) {
-			dump_node_rec(node->args->data[i], level + 1);
+		for (int i = 0; i < vec_len(node->args); i++) {
+			dump_node_rec(vec_at(node->args, i), level + 1);
 		}
 	} else if (node->kind == ND_IF) {
 		fprintf(stderr, "WHILE\n");

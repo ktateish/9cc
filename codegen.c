@@ -33,7 +33,7 @@ void gen_define_func(Node *node) {
 	printf("  push rbp\n");
 	printf("  mov rbp, rsp\n");
 	printf("  sub rsp, %d\n", node->max_offset);
-	for (int i = 0; i < node->params->len; i++) {
+	for (int i = 0; i < vec_len(node->params); i++) {
 		if (i == 5)
 			printf("  mov [rbp-48], r9\n");
 		else if (i == 4)
@@ -65,7 +65,7 @@ void gen_funcall(Node *node) {
 	if (node->kind != ND_FUNCALL) {
 		error("not function call");
 	}
-	int n = node->args->len;
+	int n = vec_len(node->args);
 	// Check whther rsp is 16byte-aligned
 	//
 	// a) if algined:
@@ -95,7 +95,7 @@ void gen_funcall(Node *node) {
 	printf("  push rax\n");
 
 	for (int i = n - 1; 0 <= i; i--) {
-		gen(node->args->data[i]);
+		gen(vec_at(node->args, i));
 		if (i == 5)
 			printf("  pop r9\n");
 		else if (i == 4)
@@ -288,9 +288,9 @@ void gen(Node *node) {
 		gen_define_int_var(node);
 	} else if (node->kind == ND_BLOCK) {
 		saved = scope_use(node->scope);
-		for (int i = 0; i < node->stmts->len; i++) {
-			gen(node->stmts->data[i]);
-			if (i + 1 < node->stmts->len) {
+		for (int i = 0; i < vec_len(node->stmts); i++) {
+			gen(vec_at(node->stmts, i));
+			if (i + 1 < vec_len(node->stmts)) {
 				printf("  pop rax\n");
 			}
 		}

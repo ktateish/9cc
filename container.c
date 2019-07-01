@@ -6,6 +6,12 @@
 #include "9cc.h"
 
 // Vector
+struct Vector {
+	void **data;
+	int capacity;
+	int len;
+};
+
 Vector *new_vector() {
 	Vector *vec = malloc(sizeof(Vector));
 	vec->data = malloc(sizeof(void *) * 16);
@@ -22,18 +28,21 @@ void vec_push(Vector *vec, void *elem) {
 	vec->data[vec->len++] = elem;
 }
 
+int vec_len(Vector *vec) { return vec->len; }
+void *vec_at(Vector *vec, int i) { return vec->data[i]; }
+
 char *string_join(Vector *strings, char *sep) {
 	int sz = 1;
-	for (int i = 0; i < strings->len; i++) {
-		char *s = strings->data[i];
+	for (int i = 0; i < vec_len(strings); i++) {
+		char *s = vec_at(strings, i);
 		sz += strlen(s);
 	}
-	sz += (strings->len - 1) * strlen(sep);
+	sz += (vec_len(strings) - 1) * strlen(sep);
 
 	char *s = malloc(sz);
 	char *p = s;
 	char *tep = "";
-	for (int i = 0; i < strings->len; i++) {
+	for (int i = 0; i < vec_len(strings); i++) {
 		char *e = strings->data[i];
 		sprintf(p, "%s%s", tep, e);
 		p += strlen(p);
@@ -52,14 +61,14 @@ void expect(int line, int expected, int actual) {
 
 void runtest() {
 	Vector *vec = new_vector();
-	expect(__LINE__, 0, vec->len);
+	expect(__LINE__, 0, vec_len(vec));
 
 	for (long i = 0; i < 100; i++) vec_push(vec, (void *)i);
 
-	expect(__LINE__, 100, vec->len);
-	expect(__LINE__, 0, (long)vec->data[0]);
-	expect(__LINE__, 50, (long)vec->data[50]);
-	expect(__LINE__, 99, (long)vec->data[99]);
+	expect(__LINE__, 100, vec_len(vec));
+	expect(__LINE__, 0, (long)vec_at(vec, 0));
+	expect(__LINE__, 50, (long)vec_at(vec, 50));
+	expect(__LINE__, 99, (long)vec_at(vec, 99));
 
 	Vector *ss = new_vector();
 	vec_push(ss, "foo");

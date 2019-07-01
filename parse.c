@@ -129,7 +129,7 @@ void init_code() { code_vec = new_vector(); }
 
 void push_code(Node *t) { vec_push(code_vec, t); }
 
-Node *code(int i) { return code_vec->data[i]; }
+Node *code(int i) { return vec_at(code_vec, i); }
 
 int consume(int kind) {
 	if (tokens(pos)->kind != kind) {
@@ -516,8 +516,8 @@ Node *define_func() {
 	Vector *params = define_func_params();
 
 	Vector *param_types = new_vector();
-	for (int i = 0; i < params->len; i++) {
-		Node *nd = params->data[i];
+	for (int i = 0; i < vec_len(params); i++) {
+		Node *nd = vec_at(params, i);
 		vec_push(param_types, nd->type);
 	}
 

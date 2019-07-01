@@ -56,13 +56,13 @@ char *type_name(Type *tp) {
 		char *returning = type_name(tp->returning);
 
 		Vector *params = new_vector();
-		for (int i = 0; i < tp->params->len; i++) {
-			Type *p = tp->params->data[i];
+		for (int i = 0; i < vec_len(tp->params); i++) {
+			Type *p = vec_at(tp->params, i);
 			char *s = type_name(p);
 			vec_push(params, s);
 		}
 		char *param_str = "";
-		if (0 < tp->params->len) {
+		if (0 < vec_len(tp->params)) {
 			param_str = string_join(params, ", ");
 		}
 

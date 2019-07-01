@@ -3,14 +3,13 @@
 #define NINE_CC_H
 
 // Vector
-typedef struct {
-	void **data;
-	int capacity;
-	int len;
-} Vector;
+struct Vector;
+typedef struct Vector Vector;
 
 Vector *new_vector();
 void vec_push(Vector *vec, void *elem);
+int vec_len(Vector *vec);
+void *vec_at(Vector *vec, int i);
 char *string_join(Vector *strings, char *sep);
 
 //
